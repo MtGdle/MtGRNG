@@ -5,6 +5,11 @@
 <meta property="og:title" content="MtGRNG – Daily Card Score">
 <meta property="og:description" content="Draw today's random Magic card, earn achievements and see how rare your pull is.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="og-image.png">
 <meta name="theme-color" content="#14121a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%83%8F%3C/text%3E%3C/svg%3E">
 <title>MtGRNG – Daily Card Score</title>
@@ -327,6 +332,32 @@ footer{margin:30px 0;color:var(--mut);font-size:.8rem}
 .namebox{margin:24px auto 0;max-width:460px;text-align:left}
 .nbrow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .nbrow input{flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit}
+
+/* ---- Username badges: the achievement's emoji on a metal plate (bronze, silver, gold, platinum by achievement level) ---- */
+.bdgs{display:inline-flex;gap:2px;vertical-align:middle;margin-left:5px}
+.bdg{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:6px;font-size:.68rem;line-height:1;font-style:normal;cursor:help;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 -1px 0 rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.45);text-shadow:none;letter-spacing:0}
+.bdg.m0{background:linear-gradient(145deg,#f3b985,#b8692f 46%,#8a4a1b 54%,#d98f50)}
+.bdg.m1{background:linear-gradient(145deg,#fbfdff,#b1bac7 46%,#8791a1 54%,#e8edf4)}
+.bdg.m2{background:linear-gradient(145deg,#fff3b8,#e3ae30 46%,#b07a10 54%,#f8d96f)}
+.bdg.m3{background:linear-gradient(120deg,#e9f7ff,#b9c9ff 25%,#e8bbff 50%,#a9ffe8 75%,#e9f7ff);background-size:220% 220%;animation:bdgshine 5s linear infinite}
+@keyframes bdgshine{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+@media (prefers-reduced-motion:reduce){.bdg.m3{animation:none}}
+.bdg.lg{width:34px;height:34px;border-radius:10px;font-size:1.2rem;cursor:pointer}
+.bdgcur{display:flex;align-items:center;gap:10px;margin:8px 0;min-height:36px;flex-wrap:wrap}
+.bdgcur .bdgs{margin:0;gap:6px}
+.bdgpool{display:flex;flex-wrap:wrap;gap:6px;max-height:210px;overflow-y:auto;padding:4px 2px}
+.bdgsel{background:none;box-shadow:none;border:2px solid transparent;border-radius:12px;padding:2px;min-width:0;cursor:pointer;line-height:0;font-size:1rem}
+.bdgsel.on{border-color:var(--ac)}
+
+/* ---- Tilt-reactive cards, share links, global rarity chip ---- */
+.cardbox.tilt{transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1);will-change:transform;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+.cardbox.tilt.tilting{transition:transform .08s linear}
+.cardbox .glare{display:block;position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;opacity:var(--gl,0);transition:opacity .3s;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.4),rgba(255,255,255,.1) 36%,transparent 62%);mix-blend-mode:soft-light}
+.foilfx.tilt.live::after{animation:none;background-position:calc(var(--mxn,50)*1.9% - 40%) 0}
+.foilfx.tilt.live::before{animation:none;filter:hue-rotate(calc(var(--mxn,50)*3.6deg))}
+.sharelinks{margin-top:8px;text-align:center;font-size:.85rem}
+.sharelinks a{cursor:pointer;text-decoration:underline}
+.apc{display:inline-block;font-size:.72rem;color:var(--mut);margin-left:6px;white-space:nowrap}
 </style></head><body>
 <header><div class="hl"><b>MtGRNG</b></div><span><button id="snd" class="tab" style="padding:2px 8px;margin:0 8px 0 0" title="Sound on/off">🔊</button><span class="sub" id="date"></span></span></header>
 <nav class="tabbar" id="tabbar"><button class="tab on" id="tabT"><i>🃏</i><span class="tl">Home</span><span class="ts">Home</span></button><button class="tab" id="tabC"><i>🗂️</i><span class="tl">Collection</span><span class="ts">Cards</span></button><button class="tab" id="tabA"><i>🏆</i><span class="tl">Achievements</span><span class="ts">Awards</span></button><button class="tab" id="tabL" hidden><i>📊</i><span class="tl">Leaderboard</span><span class="ts">Board</span></button><button class="tab" id="tabS"><i>🧪</i><span class="tl">Sandbox</span><span class="ts">Lab</span></button><button class="tab" id="tabU"><i>👤</i><span class="tl">User</span><span class="ts">You</span></button></nav>
@@ -859,8 +890,8 @@ async function calibrate(box){
  const sc=cards.map(scoreCard).sort((a,b)=>a-b),n=sc.length,pc=p=>sc[Math.min(n-1,Math.floor(p/100*n))];
  const tierOfScore=v=>{for(let i=0;i<5;i++)if(v<=TIER_CUTS[i])return i;return 5};
  const cnt=Array(6).fill(0);sc.forEach(v=>cnt[tierOfScore(v)]++);
- const cuts=[35,62,80,92,98].map(pc);
- box.innerHTML=`<div class="sub">Scored ${n} real card printings. Art tags and printing counts are skipped, so scores read a little low.</div><div>Median ${pc(50)} · average ${Math.round(sc.reduce((a,b)=>a+b,0)/n)} · 99th percentile ${pc(99)}</div><div style="margin-top:6px">With the current cut-offs [${TIER_CUTS.join(', ')}]: ${STIERS.map((t,i)=>t[0]+' '+(cnt[i]/n*100).toFixed(1)+'%').join(' · ')}</div><div style="margin-top:6px">Cut-offs for a 35/27/18/12/6/2 split: <b>TIER_CUTS</b> = [${cuts.join(', ')}]</div>`;
+ const cuts=TIER_SHARE.slice(0,5).map((x,i,a)=>a.slice(0,i+1).reduce((p,q)=>p+q,0)).map(pc);
+ box.innerHTML=`<div class="sub">Scored ${n} real card printings. Art tags and printing counts are skipped, so scores read a little low.</div><div>Median ${pc(50)} · average ${Math.round(sc.reduce((a,b)=>a+b,0)/n)} · 99th percentile ${pc(99)}</div><div style="margin-top:6px">With the current cut-offs [${TIER_CUTS.join(', ')}]: ${STIERS.map((t,i)=>t[0]+' '+(cnt[i]/n*100).toFixed(1)+'%').join(' · ')}</div><div style="margin-top:6px">Cut-offs for a ${TIER_SHARE.join('/')} split: <b>TIER_CUTS</b> = [${cuts.join(', ')}]</div>`;
 }
 // Every player gets their own card each day: the database hands out cards so no two players ever share one.
 function localPid(){let id=null;try{id=localStorage.getItem('mtgdle-pid')}catch(e){}
@@ -1040,12 +1071,12 @@ const SET_BEST=SETS.map(s=>({n:s.n,best:calcMax(new Set(s.items))}));
 const SCORE_MIN=0,SCORE_MAX=SET_BEST.map(x=>x.best).sort((a,b)=>b-a).slice(0,MAX_SETS).reduce((a,b)=>a+b,0);
 // Tier cut-offs: the highest score in each tier (Legendary is everything above the last cut-off).
 // Tuned on simulated test batches so that about 35% of draws are Common, 32% Uncommon, 17% Rare, 11% Epic, 3% Mythic and 2% Legendary.
-const TIER_CUTS=[140,190,230,290,330];
+const TIER_CUTS=[160,210,260,330,440];
 const STIERS=[['Common','#a9a9a9'],['Uncommon','#9fc6d9'],['Rare','#6ea8ff'],['Epic','#b57cff'],['Mythic','#ff7a45'],['Legendary','#ff5fa2']];
 const stBounds=STIERS.map((t,i)=>({lo:i?TIER_CUTS[i-1]+1:0,hi:i<5?TIER_CUTS[i]:Math.round(TIER_CUTS[4]*1.5)}));
 // Live rarity percentage: how many draws score at least this high. Anchored to the tier cut-offs,
 // so it agrees with the tier shares (35% Common ... 2% Legendary).
-const TIER_SHARE=[35,32,17,11,3,2];
+const TIER_SHARE=[35,27,18,12,6,2]; // % of draws per tier, Common to Legendary; TIER_CUTS below were calibrated to this split
 const PCT_ANCHORS=(()=>{let acc=0;const a=[[0,0]];TIER_CUTS.forEach((c,i)=>{acc+=TIER_SHARE[i];a.push([c,acc])});a.push([stBounds[5].hi,99.9]);return a})();
 const topPct=v=>{const a=PCT_ANCHORS;if(v<=0)return 100;for(let i=1;i<a.length;i++){if(v<=a[i][0]){const x0=a[i-1][0],y0=a[i-1][1],x1=a[i][0],y1=a[i][1];return 100-(y0+(y1-y0)*(v-x0)/(x1-x0))}}return 0.1};
 const fmtPct=p=>p>=10?Math.round(p)+'%':p>0.1?p.toFixed(1)+'%':'<0.1%';
@@ -1071,7 +1102,7 @@ function achBox(a,o){
  o=o||{};const t=TIERS[tierOf(a)],cnt=o.count||0,nx=cnt?nextMedal(cnt):null,md=cnt?medalOf(cnt):null;
  const tiles=MEDALS.map(m=>`<span class="mt${cnt>=m.n?' got mt-'+m.c:''}${nx&&nx.n===m.n?' next':''}" title="${m.name} at ${m.n}">${m.n}</span>`).join('');
  const badges=(o.nw?'<span class="newb">NEW</span>':'')+(o.up&&md?`<span class="newb up">⬆ ${md.name}</span>`:'');
- return `<div class="ab"><div class="abh"><span class="abi${o.pop?' ic':''}">${o.locked?'🔒':(a.e||'🏆')}</span><span class="abn" title="${esc(a.n)}">${esc(a.n)}</span><span class="abp">${o.locked?'':'+'}${a.pts.toLocaleString()}</span></div><div class="abb"><span class="rt">${t[0]}</span>${badges}</div><div class="abd">${esc(a.d)}</div>${cnt?`<div class="abf"><div class="mts">${tiles}</div><div class="abc"><span class="cn">×${cnt}</span> ${nx?`· Next: ${nx.name} at ${nx.n}`:'· Top medal reached'}</div></div>`:''}${o.first?`<div class="abx">First earned with ${esc(o.first)}</div>`:''}</div>`;
+ return `<div class="ab"><div class="abh"><span class="abi${o.pop?' ic':''}">${o.locked?'🔒':(a.e||'🏆')}</span><span class="abn" title="${esc(a.n)}">${esc(a.n)}</span><span class="abp">${o.locked?'':'+'}${a.pts.toLocaleString()}</span></div><div class="abb"><span class="rt">${t[0]}</span>${pctChip(a)}${badges}</div><div class="abd">${esc(a.d)}</div>${cnt?`<div class="abf"><div class="mts">${tiles}</div><div class="abc"><span class="cn">×${cnt}</span> ${nx?`· Next: ${nx.name} at ${nx.n}`:'· Top medal reached'}</div></div>`:''}${o.first?`<div class="abx">First earned with ${esc(o.first)}</div>`:''}</div>`;
 }
 function showTab(t){const NM={T:'Home',C:'Collection',A:'Achievements',L:'Leaderboard',S:'Sandbox',U:'User'};const m={T:['app','tabT'],C:['coll','tabC'],A:['ach','tabA'],S:['sbp','tabS'],U:['usr','tabU'],L:['lb','tabL']};for(const k in m){const e=document.getElementById(m[k][0]),b=document.getElementById(m[k][1]);if(e)e.hidden=k!==t;if(b)b.classList.toggle('on',k===t)}if(t==='C')renderColl();if(t==='A')renderAch();if(t==='U')renderUser();if(t==='L'&&typeof renderLb==='function')renderLb();const ab=m[t]&&document.getElementById(m[t][1]);if(ab&&ab.scrollIntoView)ab.scrollIntoView({inline:'center',block:'nearest'})}
 const FOILS=[{n:'Foil',e:'✨',d:'Foil roll (15% chance)',pts:30},{n:'Etched Foil',e:'💎',d:'Etched foil roll (3% chance)',pts:60}];
@@ -1104,6 +1135,7 @@ async function renderUser(){
  const foils=cards.filter(([d,c])=>c.foil).length,allN=ACH.length+FOILS.length,bestDay=n?Math.max(...vals):0;
  const tile=(l,v,s)=>`<div class="ut"><div class="uv">${v}</div><div class="ul">${l}</div>${s?`<div class="us">${s}</div>`:''}</div>`;
  el.innerHTML=`<div class="setc" style="text-align:center"><div class="sub" id="uname">Player</div><div class="sub" style="font-size:.8rem;letter-spacing:.12em;margin-top:6px">TOTAL SCORE</div><div class="score" id="utot">${total.toLocaleString()}</div>${n?'':'<p class="sub">Draw your first card to start your score.</p>'}<div class="sub" id="urank"></div></div><div class="ugrid">${tile('Days played',n)}${tile('Best day',bestDay.toLocaleString(),n?stTag(bestDay):'')}${tile('Average day',(n?Math.round(total/n):0).toLocaleString())}${tile('Current streak',calcStreak(st.days))}${tile('Longest streak',longestStreak(st.days))}${tile('Cards collected',cards.length)}${tile('Foil cards',foils)}${tile('Achievements',got.size+' / '+allN)}</div>${bestEntry?`<div class="setc" style="margin-top:14px"><div class="sub">Best card</div><h3 style="margin:2px 0">${esc(bestEntry[1].name)}</h3><div class="sub">${bestEntry[0]} · ${bestEntry[1].score.toLocaleString()} pts ${stTag(bestEntry[1].score)}</div></div>`:''}`;
+ if(SB_ON())renderBadgePicker(el);
  if(SB_ON()){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
   b.innerHTML=`<h3>Public leaderboard</h3><div class="sub">Pick a display name to share your daily scores. Everyone can see this name.</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="pname" maxlength="20" placeholder="Display name" value="${esc(sbName())}" style="flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit"><button class="tab" id="psave">Save name</button></div><div class="sub" id="pmsg" style="margin-top:6px"></div>`;
   el.appendChild(b);
@@ -1141,7 +1173,7 @@ function openCard(date){
  m.onclick=e=>{if(e.target===m)closeCard()};
  m.querySelector('.mclose').onclick=closeCard;
  m.querySelectorAll('.mnav button').forEach(b=>b.onclick=()=>stepCard(+b.dataset.s));
- document.body.appendChild(m);document.body.style.overflow='hidden';
+ document.body.appendChild(m);document.body.style.overflow='hidden';tiltify(m.querySelector('.cardbox'));
 }
 // ---------- Public leaderboard (Supabase) ----------
 const SB_ON=()=>!!(SB_URL&&SB_KEY);
@@ -1173,7 +1205,8 @@ async function sbRest(path,o){
 async function sbPost(st){
  if(!SB_ON()||!sbName())return;
  const s=await sbSession(),uid=s.user.id;
- await sbRest('players',{method:'POST',prefer:'resolution=merge-duplicates',body:{id:uid,name:sbName()}});
+ const pb={id:uid,name:sbName()},up=body=>sbRest('players',{method:'POST',prefer:'resolution=merge-duplicates',body});
+ try{await up({...pb,badges:bdgMine(st)})}catch(e){await up(pb)} // older database without the badges column: save the name anyway
  const c=st.cards[today];if(!c)return;
  const row={player_id:uid,day:today,score:c.score,card:c.name,tier:STIERS[stOf(c.score)][0],foil:c.foil||'',colors:c.colors||[],img:c.img||''};
  const post=body=>sbRest('daily_scores',{method:'POST',prefer:'resolution=ignore-duplicates',body});
@@ -1183,14 +1216,26 @@ function syncCloud(st){if(SB_ON()&&sbName())sbPost(st).catch(()=>{})}
 
 let lbMode='day',lbLimit=25;
 // Rows are asked for with the new "ach" column first; if the column has not been added yet (supabase_update.sql), fall back to the old columns.
-const LB_COLS='score,card,tier,foil,colors,img,day,players(name)';
+const LB_ATTEMPTS=[['players(name,badges)',true],['players(name)',true],['players(name)',false]]; // newest columns first; older databases fall back until supabase_update.sql has been run
 async function lbQuery(q){
- let rows;
- try{rows=await sbRest(q+'&select='+LB_COLS+',ach',{auth:false})}catch(e){rows=await sbRest(q+'&select='+LB_COLS,{auth:false})}
- return(rows||[]).map(r=>({...r,name:r.players&&r.players.name,ach:r.ach||[]}));
+ let rows,err;
+ for(const [pl,ach] of LB_ATTEMPTS){
+  try{rows=await sbRest(q+'&select=score,card,tier,foil,colors,img,day,'+pl+(ach?',ach':''),{auth:false});break}catch(e){err=e}
+ }
+ if(!rows&&err)throw err;
+ return(rows||[]).map(r=>({...r,name:r.players&&r.players.name,badges:(r.players&&r.players.badges)||[],ach:r.ach||[]}));
+}
+async function addBadges(rows){ // the all-time list comes from a view without badges, so look them up by name
+ if(!rows.length)return;
+ try{
+  const list='('+rows.map(r=>'"'+String(r.name).replace(/"/g,'')+'"').join(',')+')';
+  const pl=await sbRest('players?select=name,badges&name=in.'+encodeURIComponent(list),{auth:false})||[],m={};
+  pl.forEach(p=>m[p.name]=p.badges||[]);
+  rows.forEach(r=>r.badges=m[r.name]||[]);
+ }catch(e){}
 }
 async function lbData(mode,limit){
- if(mode==='all')return sbRest('all_time?order=total.desc&limit='+limit+'&select=name,total,best,days',{auth:false});
+ if(mode==='all'){const rows=(await sbRest('all_time?order=total.desc&limit='+limit+'&select=name,total,best,days',{auth:false}))||[];await addBadges(rows);return rows}
  return lbQuery('daily_scores?'+(mode==='week'?'day=gte.'+weekStart():'day=eq.'+today)+'&order=score.desc&limit='+limit);
 }
 const topCardData=()=>lbQuery('daily_scores?day=eq.'+today+'&order=score.desc&limit=1');
@@ -1200,6 +1245,76 @@ let _achBy=null;
 const achBy=()=>{if(!_achBy){_achBy={};[...ACH,...FOILS].forEach(a=>_achBy[a.n]=a)}return _achBy};
 const achList=names=>(names||[]).map(n=>achBy()[n]).filter(Boolean).sort((a,b)=>tierOf(b)-tierOf(a)||b.pts-a.pts);
 const isFoilAch=a=>a.n==='Foil'||a.n==='Etched Foil';
+const BDG_MAX=3,BDG_METAL=['Bronze','Silver','Gold','Platinum'];
+const bdgChosen=()=>{try{const v=JSON.parse(localStorage.getItem('mtgdle-badges')||'null');return Array.isArray(v)?v:null}catch(e){return null}}; // null = automatic
+const earnedAch=st=>{const got=new Set();Object.values((st&&st.cards)||{}).forEach(c=>(c.ach||[]).forEach(x=>got.add(x)));return got};
+const bdgAuto=st=>achList([...earnedAch(st)]).filter(a=>!isFoilAch(a)).slice(0,BDG_MAX).map(a=>a.n);
+const bdgMine=st=>{const ch=bdgChosen();if(ch===null)return bdgAuto(st);const got=earnedAch(st);return ch.filter(n=>got.has(n)&&achBy()[n]).slice(0,BDG_MAX)};
+const bdgOne=(a,cls)=>`<span class="bdg m${tierOf(a)}${cls?' '+cls:''}" title="${esc(a.n)} · ${TIERS[tierOf(a)][0]} (${BDG_METAL[tierOf(a)]})">${a.e||'🏆'}</span>`;
+const bdgHtml=(names,cls)=>{const l=(names||[]).map(n=>achBy()[n]).filter(Boolean).slice(0,BDG_MAX);return l.length?`<span class="bdgs">${l.map(a=>bdgOne(a,cls)).join('')}</span>`:''};
+// Badge picker on the User tab
+function renderBadgePicker(el){
+ const st=loadSt(),pool=achList([...earnedAch(st)]).filter(a=>!isFoilAch(a));
+ const old=document.getElementById('bdgpick');if(old)old.remove();
+ const box=document.createElement('div');box.id='bdgpick';box.className='setc';box.style.marginTop='14px';
+ if(!pool.length){box.innerHTML='<h3>Your badges</h3><div class="sub">Earn achievements and you can show your favorites as badges beside your name on the leaderboard.</div>';el.appendChild(box);return}
+ const cur=bdgMine(st),auto=bdgChosen()===null;
+ box.innerHTML=`<h3>Your badges</h3><div class="sub">Pick up to ${BDG_MAX} achievements to show beside your name on the leaderboard. ${auto?'Showing your rarest automatically.':'Showing your picks.'}</div><div class="bdgcur">${cur.length?bdgHtml(cur,'lg'):'<span class="sub">None selected</span>'}<span class="sub" id="bdgcap"></span></div><div class="bdgpool">${pool.map(a=>`<button class="bdgsel${cur.includes(a.n)?' on':''}" data-n="${esc(a.n)}" aria-label="${esc(a.n)}">${bdgOne(a,'lg')}</button>`).join('')}</div>${auto?'':'<button class="tab" id="bdgauto" style="margin-top:8px">Use automatic</button>'}`;
+ el.appendChild(box);
+ const cap=box.querySelector('#bdgcap'),save=()=>{if(SB_ON()&&sbName())sbPost(loadSt()).catch(()=>{})};
+ box.querySelectorAll('.bdgsel').forEach(b=>b.onclick=()=>{
+  const n=b.dataset.n,a=achBy()[n];let l=bdgMine(loadSt());
+  if(l.includes(n))l=l.filter(x=>x!==n);else if(l.length>=BDG_MAX){cap.textContent='Up to '+BDG_MAX+'. Tap a selected badge to remove it first.';return}else l.push(n);
+  try{localStorage.setItem('mtgdle-badges',JSON.stringify(l))}catch(e){}
+  save();renderBadgePicker(el);const c2=document.getElementById('bdgcap');if(c2)c2.textContent=a.n+' · '+TIERS[tierOf(a)][0]+' · '+a.d;
+ });
+ const au=box.querySelector('#bdgauto');if(au)au.onclick=()=>{try{localStorage.removeItem('mtgdle-badges')}catch(e){}save();renderBadgePicker(el)};
+}
+// ---------- Tilt-reactive card: follows your finger or mouse (and the phone's tilt when idle); foils shimmer along with it ----------
+const TILT_OK=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tiltify(box){
+ if(!TILT_OK||!box||box._tilt)return;box._tilt=1;box.classList.add('tilt');
+ const gl=document.createElement('i');gl.className='glare';box.appendChild(gl);
+ let touching=false,last=0;
+ const set=(px,py,on)=>{const s=box.style;s.setProperty('--rx',((0.5-py)*20).toFixed(1)+'deg');s.setProperty('--ry',((px-0.5)*24).toFixed(1)+'deg');s.setProperty('--mx',(px*100).toFixed(0)+'%');s.setProperty('--my',(py*100).toFixed(0)+'%');s.setProperty('--mxn',(px*100).toFixed(0));s.setProperty('--gl',on?'1':'0');box.classList.toggle('live',on)};
+ const pos=e=>{const r=box.getBoundingClientRect();return[Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))]};
+ const move=e=>{if(document.querySelector('.slamming'))return;touching=true;box.classList.add('tilting');const[x,y]=pos(e);set(x,y,true)};
+ const end=()=>{touching=false;box.classList.remove('tilting');set(.5,.5,false)};
+ const ori=e=>{
+  if(!box.isConnected){window.removeEventListener('deviceorientation',ori);return}
+  if(touching||e.gamma==null||document.querySelector('.slamming'))return;
+  const now=performance.now();if(now-last<50)return;last=now;
+  set(.5+Math.max(-25,Math.min(25,e.gamma))/50,.5+Math.max(-25,Math.min(25,(e.beta||0)-50))/50,true);
+ };
+ const listen=()=>window.addEventListener('deviceorientation',ori);
+ box.addEventListener('pointermove',move);
+ box.addEventListener('pointerdown',e=>{move(e);const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==='function'&&!tiltify._asked){tiltify._asked=1;D.requestPermission().then(r=>{if(r==='granted')listen()}).catch(()=>{})}});
+ box.addEventListener('pointerleave',end);box.addEventListener('pointercancel',end);
+ box.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')end()});
+ if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission!=='function'&&matchMedia('(pointer:coarse)').matches)listen();
+}
+// ---------- Global achievement rarity: share of all recorded draws that earned each achievement ----------
+let ACH_STATS=null;
+const pctChip=a=>{
+ if(!ACH_STATS||ACH_STATS.total<30)return '';
+ const n=ACH_STATS.m[a.n]||0,p=n/ACH_STATS.total*100;
+ return `<span class="apc" title="Share of all recorded draws that earned this achievement">🌍 ${n?(p>=10?p.toFixed(0)+'%':p>=1?p.toFixed(1)+'%':'<1%'):'Nobody yet'}</span>`;
+};
+async function loadAchStats(){
+ if(typeof sbRest==='undefined'){ // offline preview: made-up numbers
+  const m={};ACH.forEach(a=>{const r=a.pts>=60?.004:a.pts>=40?.012:a.pts>=30?.03:a.pts>=20?.07:.15;m[a.n]=Math.round(1240*r*(.5+(hash('rar'+a.n)%100)/100))});
+  ACH_STATS={m,total:1240};return;
+ }
+ try{const c=JSON.parse(localStorage.getItem('mtgdle-astats')||'null');if(c&&Date.now()-c.t<3600e3){ACH_STATS=c.v;return}}catch(e){}
+ if(!SB_ON())return;
+ try{
+  const rows=await sbRest('ach_stats?select=name,n,total',{auth:false});
+  if(!rows||!rows.length)return;
+  const m={};rows.forEach(r=>m[r.name]=r.n);ACH_STATS={m,total:rows[0].total};
+  try{localStorage.setItem('mtgdle-astats',JSON.stringify({t:Date.now(),v:ACH_STATS}))}catch(e){}
+  const el=document.getElementById('ach');if(el&&!el.hidden&&typeof renderAch==='function')renderAch();
+ }catch(e){}
+}
 const foilCls=f=>f?' foilfx'+(f==='💎'?' etched':''):'';
 const weekStart=()=>{const d=new Date(today+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));return d.toISOString().slice(0,10)}; // Monday
 const lbBubs=(names,max)=>{const l=achList(names).filter(a=>!isFoilAch(a));if(!l.length)return '';
@@ -1212,16 +1327,17 @@ function openLbCard(r){
  const cols=(r.colors&&r.colors.length?r.colors:['C']).map(x=>`<span class="pip m-${x}">${x}</span>`).join('');
  closeCard();
  const m=document.createElement('div');m.id='cardmodal';m.className='modal';
- m.innerHTML=`<div class="mbox" style="--fr:${frameColor(r.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${foilCls(r.foil)}">${r.img?`<img class="mimg" src="${esc(r.img)}" alt="${esc(r.card)}">`:`<div class="ph mimg">${esc(r.card)}</div>`}</div></div><div><div class="sub">Drawn ${esc(r.day||'')} by ${esc(nm)}${r.foil?` · ${r.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(r.card)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="score" style="font-size:2.6rem;margin-top:8px">${r.score.toLocaleString()}</div><div class="sub">points ${stTag(r.score)} · Top ${fmtPct(topPct(r.score))} of draws${its.length?` · ${its.length} achievement${its.length===1?'':'s'}`:''}</div>${rows}</div></div>`;
+ m.innerHTML=`<div class="mbox" style="--fr:${frameColor(r.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${foilCls(r.foil)}">${r.img?`<img class="mimg" src="${esc(r.img)}" alt="${esc(r.card)}">`:`<div class="ph mimg">${esc(r.card)}</div>`}</div></div><div><div class="sub">Drawn ${esc(r.day||'')} by ${esc(nm)}${bdgHtml(r.badges)}${r.foil?` · ${r.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(r.card)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="score" style="font-size:2.6rem;margin-top:8px">${r.score.toLocaleString()}</div><div class="sub">points ${stTag(r.score)} · Top ${fmtPct(topPct(r.score))} of draws${its.length?` · ${its.length} achievement${its.length===1?'':'s'}`:''}</div>${rows}</div></div>`;
  m.onclick=e=>{if(e.target===m)closeCard()};
  m.querySelector('.mclose').onclick=closeCard;
- document.body.appendChild(m);document.body.style.overflow='hidden';
+ document.body.appendChild(m);document.body.style.overflow='hidden';tiltify(m.querySelector('.cardbox'));
 }
 
 // One featured card (used at the top of the leaderboard and on the Home page)
 const featHtml=(f,label,me,showDay)=>{const fn=f.name||'Someone';
- return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${showDay&&f.day?' · '+esc(f.day):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
-const lbWire=(el,rows)=>el.querySelectorAll('[data-i]').forEach(n=>{n.onclick=()=>openLbCard(rows[+n.dataset.i]);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLbCard(rows[+n.dataset.i])}}});
+ return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(f.day):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
+const lbWire=(el,rows)=>{el.querySelectorAll('.lbfeat .cardbox').forEach(tiltify);return lbWire0(el,rows)};
+const lbWire0=(el,rows)=>el.querySelectorAll('[data-i]').forEach(n=>{n.onclick=()=>openLbCard(rows[+n.dataset.i]);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLbCard(rows[+n.dataset.i])}}});
 const LB_MODES=[['day','Today'],['week','This week'],['all','All-time']];
 async function renderLb(){
  const el=document.getElementById('lb'),msg=t=>`<p class="sub" style="text-align:center;padding:40px 0">${t}</p>`;
@@ -1232,10 +1348,10 @@ async function renderLb(){
   const tg=`<div class="lbtabs">${LB_MODES.map(([k,l])=>`<button class="tab ${lbMode===k?'on':''}" data-m="${k}">${l}</button>`).join('')}</div>`;
   let body;
   if(!rows.length)body=msg('No scores yet. Draw a card to get on the board.');
-  else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr static${r.name===me?' me':''}"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
+  else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr static${r.name===me?' me':''}"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}${bdgHtml(r.badges)}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
   else{
    body=featHtml(rows[0],lbMode==='week'?'BEST DRAW THIS WEEK':"TODAY'S BEST DRAW",me,lbMode==='week')+
-    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${lbMode==='week'&&r.day?' · '+esc(r.day):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
+    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${lbMode==='week'&&r.day?' · '+esc(r.day):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
   }
   const more=rows.length>=lbLimit&&lbLimit<100?'<button class="tab lbmore" id="lbmore">Show more</button>':'';
   el.innerHTML=tg+body+more;
@@ -1368,19 +1484,67 @@ function cdTick(){
 window._cdDay=new Date().toISOString().slice(0,10);
 setInterval(cdTick,1000);
 
-// ---------- Share result: copies the card, score, top 3 achievements and a link to the site ----------
+// ---------- Share result: a picture of the result (card, score, top 3 achievements, link) plus the same info as text ----------
 const SHARE_URL=''; // put your final web address here if it differs from the page's own address
-function shareResult(btnId,o){
- const btn=document.getElementById(btnId),tier=STIERS[stOf(o.score)][0];
- const top=o.items.filter(a=>a.n!=='Foil'&&a.n!=='Etched Foil').slice().sort((a,b)=>tierOf(b)-tierOf(a)||b.pts-a.pts).slice(0,3);
- const url=SHARE_URL||(/^https?:/.test(location.protocol)?location.origin+location.pathname:'');
+const shareLink=()=>SHARE_URL||(/^https?:/.test(location.protocol)?location.origin+location.pathname:'');
+const shareTop=items=>items.filter(a=>a.n!=='Foil'&&a.n!=='Etched Foil').slice().sort((a,b)=>tierOf(b)-tierOf(a)||b.pts-a.pts).slice(0,3);
+function shareText(o){
+ const tier=STIERS[stOf(o.score)][0],top=shareTop(o.items),url=shareLink();
  const lines=[`🃏 MtGRNG · ${o.sb?'Sandbox':today}`,`${o.name}${o.code?' ('+String(o.code).toUpperCase()+')':''}${o.foil?' '+o.foil.e+' '+o.foil.n:''}`,`⭐ ${o.score.toLocaleString()} points · ${tier} · Top ${fmtPct(topPct(o.score))}`];
  if(top.length){lines.push('','Top achievements:');top.forEach(a=>lines.push(`${a.e||'🏆'} ${a.n}`))}
  if(url)lines.push('',url);
- const text=lines.join('\n'),label=btn.textContent==='Copied!'?'Share result':btn.textContent;
- const done=()=>{btn.textContent='Copied!';setTimeout(()=>{btn.textContent=label},2000)};
+ return lines.join('\n');
+}
+const hexA=(h,a)=>{const m=/^#([0-9a-f]{6})$/i.exec(h);if(!m)return h;const n=parseInt(m[1],16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`};
+const rrPath=(x,a,b,w,h,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()};
+const loadImg=(src,ms)=>new Promise(res=>{if(!src)return res(null);const im=new Image();im.crossOrigin='anonymous';const t=setTimeout(()=>res(null),ms||5000);im.onload=()=>{clearTimeout(t);res(im)};im.onerror=()=>{clearTimeout(t);res(null)};im.src=src});
+async function buildShareImage(o){
+ const W=1080,H=1500,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+ try{await Promise.race([document.fonts.load('800 60px Cinzel'),new Promise(r=>setTimeout(r,1500))])}catch(e){}
+ const T=STIERS[stOf(o.score)],tc=T[1],fr=frameColor(o.cols||[]),SERIF="Cinzel, Georgia, serif",BODY="'EB Garamond', Georgia, serif";
+ let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#241d3a');g.addColorStop(1,'#0e0c15');x.fillStyle=g;x.fillRect(0,0,W,H);
+ g=x.createRadialGradient(W/2,560,60,W/2,560,820);g.addColorStop(0,hexA(tc,.4));g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.textAlign='center';x.textBaseline='alphabetic';
+ x.fillStyle='#e8b84a';x.font='800 56px '+SERIF;x.fillText('MTGRNG',W/2,92);
+ x.fillStyle='#cfc2ea';x.font='500 32px '+BODY;x.fillText((o.sb?'Sandbox':today)+(o.foil?'   '+o.foil.e+' '+o.foil.n:''),W/2,142);
+ const cw=560,ch=780,cx=(W-cw)/2,cy=175,im=await loadImg(o.img);
+ x.save();x.shadowColor=fr;x.shadowBlur=70;rrPath(x,cx,cy,cw,ch,28);x.fillStyle='#000';x.fill();x.restore();
+ if(im){x.save();rrPath(x,cx,cy,cw,ch,26);x.clip();x.drawImage(im,cx,cy,cw,ch);x.restore()}
+ else{rrPath(x,cx,cy,cw,ch,26);x.fillStyle='#2a2540';x.fill();x.fillStyle='#fff';x.font='700 46px '+SERIF;let ln='',y=cy+ch/2-20;String(o.name).split(' ').forEach(w=>{if(x.measureText(ln+w).width>460&&ln){x.fillText(ln.trim(),W/2,y);y+=60;ln=''}ln+=w+' '});x.fillText(ln.trim(),W/2,y)}
+ x.lineWidth=9;if(o.foil){g=x.createLinearGradient(cx,cy,cx+cw,cy+ch);['#ff6ec7','#7873ff','#4cd9ff','#7dffb0','#fff27a','#ff6ec7'].forEach((c,i)=>g.addColorStop(i/5,c));x.strokeStyle=g}else x.strokeStyle=fr;
+ rrPath(x,cx,cy,cw,ch,28);x.stroke();
+ x.fillStyle='#e8b84a';x.font='800 150px '+SERIF;x.fillText(o.score.toLocaleString(),W/2,1118);
+ x.fillStyle='#cfc2ea';x.font='600 34px '+BODY;x.fillText('POINTS',W/2,1166);
+ x.fillStyle=tc;x.font='800 42px '+SERIF;x.fillText(T[0].toUpperCase()+'  ·  TOP '+fmtPct(topPct(o.score))+' OF DRAWS',W/2,1226);
+ let py=1262;
+ shareTop(o.items).forEach(a=>{
+  const txt=(a.e||'🏆')+'  '+a.n;x.font='700 32px '+BODY;const w=Math.min(W-140,x.measureText(txt).width+64);
+  rrPath(x,(W-w)/2,py,w,52,26);x.fillStyle='rgba(0,0,0,.45)';x.fill();x.lineWidth=3;x.strokeStyle=TIERS[tierOf(a)][1];x.stroke();
+  x.fillStyle='#fff';x.fillText(txt,W/2,py+37);py+=62;
+ });
+ x.fillStyle='#cfc2ea';x.font='500 34px '+BODY;x.fillText(shareLink().replace(/^https?:\/\//,'').replace(/\/$/,'')||'MtGRNG',W/2,1474);
+ return new Promise(r=>cv.toBlob(r,'image/png'));
+}
+function copyShare(text,el){
+ const done=()=>{if(!el)return;const l=el.dataset.l||(el.dataset.l=el.textContent);el.textContent='Copied!';setTimeout(()=>{el.textContent=l},2000)};
  const fb=()=>{const t=document.createElement('textarea');t.value=text;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove();done()};
  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(done,fb);else fb();
+}
+async function saveShareImage(o){
+ const blob=await(o.pre||buildShareImage(o));if(!blob)return;
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mtgrng-'+today+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+async function shareResult(btnId,o){
+ const btn=document.getElementById(btnId),text=shareText(o);
+ if(!btn.dataset.l)btn.dataset.l=btn.textContent;
+ if(navigator.share&&navigator.canShare){
+  try{
+   const blob=await(o.pre||buildShareImage(o));
+   const file=blob&&new File([blob],'mtgrng-'+today+'.png',{type:'image/png'});
+   if(file&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text,title:'MtGRNG'});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+ }
+ copyShare(text,btn);
 }
 function render(c,o){o=o||{};const SB=!!o.sandbox,P=SB?'s-':'',root=document.getElementById(SB?'sbx':'app');
  const earned=ACH.filter(a=>a.t(c)), tops={};
@@ -1410,7 +1574,7 @@ function render(c,o){o=o||{};const SB=!!o.sandbox,P=SB?'s-':'',root=document.get
  <div id="${P}det" hidden><div class="dgrid2"><span class="dc">🎨 ${esc(c.artist||'Unknown artist')}</span><span class="dc">📅 ${fmt(c.released_at)}</span>${c.first_released&&c.first_released!==c.released_at?`<span class="dc">🕰️ 1st ${fmt(c.first_released)}</span>`:''}<span class="dc">💠 ${esc(c.rarity[0].toUpperCase()+c.rarity.slice(1))} · MV ${c.cmc}</span>${c.collector_number?`<span class="dc">#${esc(c.collector_number)}</span>`:''}${c.prices?.usd?`<span class="dc">💲${(+c.prices.usd).toLocaleString()}</span>`:''}${c.printings?`<span class="dc">🖨️ ${c.printings} prints</span>`:''}</div>${ft?`<div class="fl" onclick="this.classList.toggle('open')">“${esc(ft)}”</div>`:''}</div></div>
  <div class="sidecol"><div class="sub">${SB?"Sandbox card":"Today's card"}${foil?` · <b style="color:#8fe3ff">${foil.e} ${foil.n} +${foil.pts}</b>`:''}</div>
  <div class="scorerow"><div class="score" id="${P}sc">0</div><span class="ptsw">points</span></div><div class="sub">${hits.length} of ${ACH.length} achievements<span id="${P}skip" style="cursor:pointer"> · <span style="text-decoration:underline">skip</span></span></div><div class="meter" id="${P}mt"><div class="mbar">${STIERS.map(t=>'<i></i>').join('')}</div><div class="mlab"><span class="mname"></span><span class="mpct"></span></div></div>
- <button id="${P}sh">Share result</button></div></div>
+ <button id="${P}sh">Share result</button><div class="sub sharelinks"><a id="${P}shc">Copy text</a> · <a id="${P}shi">Save image</a></div></div></div>
  <ul id="${P}al"></ul>
  ${SB?'<div class="stats"><span>🧪 Sandbox: this score is not saved or added to your points.</span></div>':`<div class="stats"><span>Days played: ${v.length}</span><span>Best: ${best}</span><span>Average: ${avg}</span><span title="Turned sideways, like a tapped card">Streak:<b class="tapped">${streak}</b>day${streak===1?'':'s'}</span></div>`}${SB?'':cdHtml()}${SB?'':'<div id="namebox"></div>'}`;if(!SB)renderNameBox();
  const im=root.querySelector('.art');
@@ -1430,14 +1594,18 @@ function render(c,o){o=o||{};const SB=!!o.sandbox,P=SB?'s-':'',root=document.get
   while(shown<items.length&&!stop){addOne();await wait(gap+(items[shown-1]&&items[shown-1].pts>=30?500:0))}
   if(!stop)finish();
  })();
- document.getElementById(P+'sh').onclick=()=>shareResult(P+'sh',{name:c.name,code:c.set,foil,score,items,sb:SB});
+ const shareObj={name:c.name,code:c.set,foil,score,items,sb:SB,img,cols};
+ slam.then(()=>{shareObj.pre=buildShareImage(shareObj).catch(()=>null);tiltify(root.querySelector('.top>.cardbox'))},()=>{});
+ document.getElementById(P+'sh').onclick=()=>shareResult(P+'sh',shareObj);
+ document.getElementById(P+'shc').onclick=()=>copyShare(shareText(shareObj),document.getElementById(P+'shc'));
+ document.getElementById(P+'shi').onclick=()=>saveShareImage(shareObj);
 }
 document.getElementById('date').textContent=today;
 const sb=document.getElementById('snd');sb.textContent=SND?'🔊':'🔇';sb.onclick=()=>{SND=!SND;sb.textContent=SND?'🔊':'🔇';try{localStorage.setItem('mtgdle-snd',SND?'on':'off')}catch(e){}};
 document.getElementById('tabT').onclick=()=>showTab('T');document.getElementById('tabC').onclick=()=>showTab('C');document.getElementById('tabA').onclick=()=>showTab('A');document.getElementById('tabS').onclick=()=>showTab('S');document.getElementById('tabU').onclick=()=>showTab('U');document.getElementById('tabL').onclick=()=>showTab('L');if(SB_ON())document.getElementById('tabL').hidden=false;
 document.getElementById('sbgo').onclick=sbDraw;
 const drawnToday=loadSt().days[today]!==undefined;
-document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();
+document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();loadAchStats();
 document.getElementById('gen').onclick=async()=>{
  const app=document.getElementById('app'),wait=ms=>new Promise(r=>setTimeout(r,ms));
  const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
