@@ -1188,6 +1188,243 @@ function renderAch(){
  const MC={bronze:'#d9955a',silver:'#cfd6e2',gold:'#f0c04a',plat:'#7fe0ff',diamond:'#c4a8ff'};
  const nu=all.filter(a=>got[a.n]&&nextMedal(got[a.n].n)).map(a=>{const c=got[a.n].n,nx=nextMedal(c),pv=medalOf(c);return{a,c,nx,left:nx.n-c,p:Math.max(4,Math.round((c-pv.n)/(nx.n-pv.n)*100))}}).sort((x,y)=>x.left-y.left||y.nx.n-x.nx.n||y.a.pts-x.a.pts).slice(0,3);
  const nextUp=nu.length?`<div class="setc nu" style="margin-bottom:12px"><h3>Closest to a new medal</h3>${nu.map(u=>`<div class="nurow" style="--mc:${MC[u.nx.c]}" title="×${u.c} · ${u.nx.name} at ${u.nx.n}"><span class="nui">${u.a.e||'🏆'}</span><div class="num"><div class="nun"><b>${esc(u.a.n)}</b><span class="nuc">×${u.c}</span><span class="nur">${u.left} more → ${u.nx.e}</span></div><div class="pbar"><b data-w="${u.p}" style="width:${u.p}%"></b></div></div></div>`).join('')}</div>`:'';
+ const setHtml=sets.map(s=>{const its=s.items.map(n=>byN[n]).filter(Boolean),d=its.filter(a=>got[a.n]).length,full=its.length>0&&d===its.length,p=its.length?pct(d/its.length):0,open=openSets.has(s.n);
+  return `<div class="setc${full?' done':''}"><h3 class="sh${open?' open':''}" data-s="${esc(s.n)}"><span>${s.e} ${esc(s.n)}${full?' ✅':''}</span><span class="sc">${d} / ${its.length} <i class="chev">▸</i></span></h3><ul${open?'':' hidden'}>${its.map(row).join('')}</ul>${bar(p)}<div class="plab"><span>${p}%</span><span>${full?'Complete!':''}</span></div></div>`}).join('');
+ el.innerHTML=`${nextUp}<div class="setc" style="margin-bottom:14px"><h3>Collection Progress</h3><div class="sub" style="font-size:.85rem">Where achievements form a ladder (like the Commander Staple tiers), a card only earns its highest rung.</div><div class="sub" style="font-size:.8rem;margin-top:4px">Earn an achievement again and again to rank up its border: Bronze 1 · Silver 5 · Gold 10 · Platinum 20 · Diamond 50 times</div><div class="plab" style="margin:4px 0"><span>${done} of ${all.length} achievements</span><span>${pct(done/all.length)}%</span></div>${bar(pct(done/all.length))}<div style="display:flex;gap:8px;margin-top:10px"><button class="tab" id="expAll">Expand all</button><button class="tab" id="colAll">Collapse all</button></div></div><div class="sets">${setHtml}</div>`;
+ el.querySelectorAll('.sh').forEach(h=>h.onclick=()=>{const n=h.dataset.s,ul=h.nextElementSibling;ul.hidden=!ul.hidden;if(ul.hidden)openSets.delete(n);else openSets.add(n);h.classList.toggle('open',!ul.hidden)});
+ el.querySelector('#expAll').onclick=()=>{sets.forEach(s=>openSets.add(s.n));renderAch()};
+ el.querySelector('#colAll').onclick=()=>{openSets.clear();renderAch()};
+ requestAnimationFrame(()=>requestAnimationFrame(()=>el.querySelectorAll('.pbar b').forEach(b=>b.style.width=b.dataset.w+'%')));
+}
+function longestStreak(days){const ks=Object.keys(days).sort();let best=0,cur=0,prev=null;ks.forEach(k=>{const d=new Date(k+'T00:00:00Z');cur=(prev&&d-prev===864e5)?cur+1:1;if(cur>best)best=cur;prev=d});return best}
+const hasCloud=()=>typeof DB!=='undefined'&&DB&&typeof UID!=='undefined'&&UID;
+async function renderUser(){
+ const el=document.getElementById('usr'),st=loadSt();
+ const vals=Object.values(st.days),n=vals.length,total=vals.reduce((a,b)=>a+b,0),cards=Object.entries(st.cards);
+ const bestEntry=cards.slice().sort((a,b)=>b[1].score-a[1].score)[0],got=new Set();
+ cards.forEach(([d,c])=>(c.ach||[]).forEach(x=>got.add(x)));
+ const foils=cards.filter(([d,c])=>c.foil).length,allN=ACH.length+FOILS.length,bestDay=n?Math.max(...vals):0;
+ const tile=(l,v,s)=>`<div class="ut"><div class="uv">${v}</div><div class="ul">${l}</div>${s?`<div class="us">${s}</div>`:''}</div>`;
+ el.innerHTML=`<div class="setc" style="text-align:center"><div class="sub" id="uname">Player</div><div class="sub" style="font-size:.8rem;letter-spacing:.12em;margin-top:6px">TOTAL SCORE</div><div class="score" id="utot">${total.toLocaleString()}</div>${n?'':'<p class="sub">Draw your first card to start your score.</p>'}<div class="sub" id="urank"></div></div><div class="ugrid">${tile('Days played',n)}${tile('Best day',bestDay.toLocaleString(),n?stTag(bestDay):'')}${tile('Average day',(n?Math.round(total/n):0).toLocaleString())}${tile('Current streak',calcStreak(st.days))}${tile('Longest streak',longestStreak(st.days))}${tile('Cards collected',cards.length)}${tile('Foil cards',foils)}${tile('Achievements',got.size+' / '+allN)}</div>${bestEntry?`<div class="setc" style="margin-top:14px"><div class="sub">Best card</div><h3 style="margin:2px 0">${esc(bestEntry[1].name)}</h3><div class="sub">${bestEntry[0]} · ${bestEntry[1].score.toLocaleString()} pts ${stTag(bestEntry[1].score)}</div></div>`:''}`;
+ if(SB_ON())renderBadgePicker(el);
+ if(SB_ON()){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
+  b.innerHTML=`<h3>Public leaderboard</h3><div class="sub">Pick a display name to share your daily scores. Everyone can see this name.</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="pname" maxlength="20" placeholder="Display name" value="${esc(sbName())}" style="flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit"><button class="tab" id="psave">Save name</button></div><div class="sub" id="pmsg" style="margin-top:6px"></div>`;
+  el.appendChild(b);
+  b.querySelector('#psave').onclick=async()=>{const v=b.querySelector('#pname').value.trim(),m=b.querySelector('#pmsg'),prev=sbName();
+   if(!/^[\w .'-]{2,20}$/.test(v)){m.textContent='Use 2 to 20 letters, numbers or spaces.';return}
+   m.textContent='Saving…';
+   try{localStorage.setItem('mtgdle-name',v);await sbPost(loadSt());m.textContent='Saved. You are on the leaderboard.'}
+   catch(e){m.textContent=String(e.message).includes('409')?'That name is taken. Try another.':'Could not reach the leaderboard.';try{if(prev)localStorage.setItem('mtgdle-name',prev);else localStorage.removeItem('mtgdle-name')}catch(x){}}};
+ }
+ if(location.hash==='#calibrate'&&typeof calibrate==='function'){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';b.innerHTML='<h3>Calibrate tiers</h3><div class="sub">Samples real cards from Scryfall and suggests tier cut-offs.</div><button id="calbtn" style="margin-top:8px">Run calibration</button> <button id="arttest" class="tab" style="margin:8px 0 0 6px">Check art tags</button><div id="calout" style="margin-top:8px"></div>';el.appendChild(b);b.querySelector('#calbtn').onclick=()=>calibrate(b.querySelector('#calout'));b.querySelector('#arttest').onclick=()=>checkArtTags(b.querySelector('#calout'))}
+ if(hasCloud()){
+  try{
+   const ps=await USER.profiles([UID]);
+   const u=document.getElementById('uname');if(u)u.textContent=(ps[UID]&&ps[UID].name)||'You';
+   const rows=(await DB.collection('scores').orderBy('total','desc').limit(100).get()).docs,i=rows.findIndex(d=>d.id===UID);
+   const r=document.getElementById('urank');if(r)r.textContent=i>=0?'Rank #'+(i+1)+' of '+rows.length+(rows.length===100?'+':'')+' players':'Outside the top 100';
+  }catch(e){}
+ }else{const u=document.getElementById('uname');if(u)u.textContent='Player (saved in this browser)'}
+}
+function closeCard(){const m=document.getElementById('cardmodal');if(m)m.remove();document.body.style.overflow=''}
+function stepCard(d){const l=window._shelf||[],i=l.indexOf(window._cur);if(i<0)return;openCard(l[(i+d+l.length)%l.length])}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCard();else if(document.getElementById('cardmodal')){if(e.key==='ArrowRight')stepCard(1);if(e.key==='ArrowLeft')stepCard(-1)}});
+// Tap-to-enlarge view of a collected card, with its score and the achievements it earned
+function openCard(date){
+ const c=loadSt().cards[date];if(!c)return;
+ window._cur=date;
+ const by={};[...ACH,...FOILS].forEach(a=>by[a.n]=a);
+ const its=(c.ach||[]).map(n=>by[n]).filter(Boolean).sort((a,b)=>tierOf(b)-tierOf(a)||b.pts-a.pts);
+ const rows=its.length?`<ul>${its.map(a=>`<li class="tr" style="--tc:${TIERS[tierOf(a)][1]}">${achBox(a)}</li>`).join('')}</ul>`:`<p class="sub">Achievement details were not saved for this card.</p>`;
+ const cols=(c.colors&&c.colors.length?c.colors:['C']).map(x=>`<span class="pip m-${x}">${x}</span>`).join('');
+ const many=(window._shelf||[]).length>1;
+ closeCard();
+ const m=document.createElement('div');m.id='cardmodal';m.className='modal';
+ m.innerHTML=`<div class="mbox" style="--fr:${frameColor(c.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${c.foil?' foilfx'+(c.foil==='💎'?' etched':''):''}">${c.img?`<img class="mimg" src="${esc(c.img)}" alt="${esc(c.name)}">`:`<div class="ph mimg">${esc(c.name)}</div>`}</div></div><div><div class="sub">Drawn ${date}${c.foil?` · ${c.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(c.name)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="sub">${esc(c.type||'')} · ${esc(c.set||'')} <span class="tag">${esc((c.code||'').toUpperCase())}</span></div><div class="score" style="font-size:2.6rem;margin-top:8px">${c.score.toLocaleString()}</div><div class="sub">points ${stTag(c.score)} · ${its.length} achievement${its.length===1?'':'s'}</div>${rows}${many?`<div class="mnav"><button class="tab" data-s="-1">◀ Prev</button><button class="tab" data-s="1">Next ▶</button></div>`:''}</div></div>`;
+ m.onclick=e=>{if(e.target===m)closeCard()};
+ m.querySelector('.mclose').onclick=closeCard;
+ m.querySelectorAll('.mnav button').forEach(b=>b.onclick=()=>stepCard(+b.dataset.s));
+ document.body.appendChild(m);document.body.style.overflow='hidden';tiltify(m.querySelector('.cardbox'));
+}
+// ---------- Public leaderboard (Supabase) ----------
+const SB_ON=()=>!!(SB_URL&&SB_KEY);
+const sbName=()=>{try{return localStorage.getItem('mtgdle-name')||''}catch(e){return ''}};
+const SBK='mtgdle-sbsess';
+async function sbSession(){
+ let s=null;try{s=JSON.parse(localStorage.getItem(SBK)||'null')}catch(e){}
+ const now=Date.now()/1000,H={apikey:SB_KEY,'Content-Type':'application/json'};
+ if(s&&s.expires_at>now+60)return s;
+ if(s&&s.refresh_token){
+  try{const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:H,body:JSON.stringify({refresh_token:s.refresh_token})});
+   if(r.ok){s=await r.json();s.expires_at=s.expires_at||Math.floor(now+(s.expires_in||3600));localStorage.setItem(SBK,JSON.stringify(s));return s}}catch(e){}
+ }
+ const r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:H,body:'{}'}); // anonymous sign-in: no email or password
+ if(!r.ok)throw new Error('auth '+r.status);
+ s=await r.json();s.expires_at=s.expires_at||Math.floor(now+(s.expires_in||3600));
+ try{localStorage.setItem(SBK,JSON.stringify(s))}catch(e){}
+ return s;
+}
+async function sbRest(path,o){
+ o=o||{};const h={apikey:SB_KEY,'Content-Type':'application/json'};
+ if(o.auth===false)h.Authorization='Bearer '+SB_KEY;else h.Authorization='Bearer '+(await sbSession()).access_token;
+ if(o.prefer)h.Prefer=o.prefer;
+ const r=await fetch(SB_URL+'/rest/v1/'+path,{method:o.method||'GET',headers:h,body:o.body?JSON.stringify(o.body):undefined});
+ if(!r.ok)throw new Error(path.split('?')[0]+' '+r.status);
+ return r.status===204?null:r.json().catch(()=>null);
+}
+// Saves the player's name and today's score (one score per day; the database refuses a second one)
+async function sbPost(st){
+ if(!SB_ON()||!sbName())return;
+ const s=await sbSession(),uid=s.user.id;
+ const pb={id:uid,name:sbName()},up=body=>sbRest('players',{method:'POST',prefer:'resolution=merge-duplicates',body});
+ try{await up({...pb,badges:bdgMine(st)})}catch(e){await up(pb)} // older database without the badges column: save the name anyway
+ const c=st.cards[today];if(!c)return;
+ const row={player_id:uid,day:today,score:c.score,card:c.name,tier:STIERS[stOf(c.score)][0],foil:c.foil||'',colors:c.colors||[],img:c.img||''};
+ const post=body=>sbRest('daily_scores',{method:'POST',prefer:'resolution=ignore-duplicates',body});
+ try{await post({...row,ach:c.ach||[]})}catch(e){await post(row)} // older database without the ach column: save the score anyway
+}
+function syncCloud(st){if(SB_ON()&&sbName())sbPost(st).catch(()=>{})}
+
+let lbMode='day',lbLimit=25;
+// Rows are asked for with the new "ach" column first; if the column has not been added yet (supabase_update.sql), fall back to the old columns.
+const LB_ATTEMPTS=[['players(name,badges)',true],['players(name)',true],['players(name)',false]]; // newest columns first; older databases fall back until supabase_update.sql has been run
+async function lbQuery(q){
+ let rows,err;
+ for(const [pl,ach] of LB_ATTEMPTS){
+  try{rows=await sbRest(q+'&select=score,card,tier,foil,colors,img,day,'+pl+(ach?',ach':''),{auth:false});break}catch(e){err=e}
+ }
+ if(!rows&&err)throw err;
+ return(rows||[]).map(r=>({...r,name:r.players&&r.players.name,badges:(r.players&&r.players.badges)||[],ach:r.ach||[]}));
+}
+async function addBadges(rows){ // the all-time list comes from a view without badges, so look them up by name
+ if(!rows.length)return;
+ try{
+  const list='('+rows.map(r=>'"'+String(r.name).replace(/"/g,'')+'"').join(',')+')';
+  const pl=await sbRest('players?select=name,badges&name=in.'+encodeURIComponent(list),{auth:false})||[],m={};
+  pl.forEach(p=>m[p.name]=p.badges||[]);
+  rows.forEach(r=>r.badges=m[r.name]||[]);
+ }catch(e){}
+}
+async function lbData(mode,limit){
+ if(mode==='all'){const rows=(await sbRest('all_time?order=total.desc&limit='+limit+'&select=name,total,best,days',{auth:false}))||[];await addBadges(rows);return rows}
+ return lbQuery('daily_scores?'+(mode==='week'?'day=gte.'+weekStart():'day=eq.'+today)+'&order=score.desc&limit='+limit);
+}
+const topCardData=()=>lbQuery('daily_scores?day=eq.'+today+'&order=score.desc&limit=1');
+
+// ---------- Leaderboard view: featured best card with achievement bubbles, clickable rows, card pop-up ----------
+let _achBy=null;
+const achBy=()=>{if(!_achBy){_achBy={};[...ACH,...FOILS].forEach(a=>_achBy[a.n]=a)}return _achBy};
+const achList=names=>(names||[]).map(n=>achBy()[n]).filter(Boolean).sort((a,b)=>tierOf(b)-tierOf(a)||b.pts-a.pts);
+const isFoilAch=a=>a.n==='Foil'||a.n==='Etched Foil';
+const BDG_MAX=3,BDG_METAL=['Bronze','Silver','Gold','Platinum'];
+const bdgChosen=()=>{try{const v=JSON.parse(localStorage.getItem('mtgdle-badges')||'null');return Array.isArray(v)?v:null}catch(e){return null}}; // null = automatic
+const earnedAch=st=>{const got=new Set();Object.values((st&&st.cards)||{}).forEach(c=>(c.ach||[]).forEach(x=>got.add(x)));return got};
+const bdgAuto=st=>achList([...earnedAch(st)]).filter(a=>!isFoilAch(a)).slice(0,BDG_MAX).map(a=>a.n);
+const bdgMine=st=>{const ch=bdgChosen();if(ch===null)return bdgAuto(st);const got=earnedAch(st);return ch.filter(n=>got.has(n)&&achBy()[n]).slice(0,BDG_MAX)};
+const bdgOne=(a,cls)=>`<span class="bdg m${tierOf(a)}${cls?' '+cls:''}" title="${esc(a.n)} · ${TIERS[tierOf(a)][0]} (${BDG_METAL[tierOf(a)]})">${a.e||'🏆'}</span>`;
+const bdgHtml=(names,cls)=>{const l=(names||[]).map(n=>achBy()[n]).filter(Boolean).slice(0,BDG_MAX);return l.length?`<span class="bdgs">${l.map(a=>bdgOne(a,cls)).join('')}</span>`:''};
+// Badge picker on the User tab
+function renderBadgePicker(el){
+ const st=loadSt(),pool=achList([...earnedAch(st)]).filter(a=>!isFoilAch(a));
+ const old=document.getElementById('bdgpick');if(old)old.remove();
+ const box=document.createElement('div');box.id='bdgpick';box.className='setc';box.style.marginTop='14px';
+ if(!pool.length){box.innerHTML='<h3>Your badges</h3><div class="sub">Earn achievements and you can show your favorites as badges beside your name on the leaderboard.</div>';el.appendChild(box);return}
+ const cur=bdgMine(st),auto=bdgChosen()===null;
+ box.innerHTML=`<h3>Your badges</h3><div class="sub">Pick up to ${BDG_MAX} achievements to show beside your name on the leaderboard. ${auto?'Showing your rarest automatically.':'Showing your picks.'}</div><div class="bdgcur">${cur.length?bdgHtml(cur,'lg'):'<span class="sub">None selected</span>'}<span class="sub" id="bdgcap"></span></div><div class="bdgpool">${pool.map(a=>`<button class="bdgsel${cur.includes(a.n)?' on':''}" data-n="${esc(a.n)}" aria-label="${esc(a.n)}">${bdgOne(a,'lg')}</button>`).join('')}</div>${auto?'':'<button class="tab" id="bdgauto" style="margin-top:8px">Use automatic</button>'}`;
+ el.appendChild(box);
+ const cap=box.querySelector('#bdgcap'),save=()=>{if(SB_ON()&&sbName())sbPost(loadSt()).catch(()=>{})};
+ box.querySelectorAll('.bdgsel').forEach(b=>b.onclick=()=>{
+  const n=b.dataset.n,a=achBy()[n];let l=bdgMine(loadSt());
+  if(l.includes(n))l=l.filter(x=>x!==n);else if(l.length>=BDG_MAX){cap.textContent='Up to '+BDG_MAX+'. Tap a selected badge to remove it first.';return}else l.push(n);
+  try{localStorage.setItem('mtgdle-badges',JSON.stringify(l))}catch(e){}
+  save();renderBadgePicker(el);const c2=document.getElementById('bdgcap');if(c2)c2.textContent=a.n+' · '+TIERS[tierOf(a)][0]+' · '+a.d;
+ });
+ const au=box.querySelector('#bdgauto');if(au)au.onclick=()=>{try{localStorage.removeItem('mtgdle-badges')}catch(e){}save();renderBadgePicker(el)};
+}
+// ---------- Tilt-reactive card: follows your finger or mouse (and the phone's tilt when idle); foils shimmer along with it ----------
+const TILT_OK=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tiltify(box){
+ if(!TILT_OK||!box||box._tilt)return;box._tilt=1;box.classList.add('tilt');
+ const gl=document.createElement('i');gl.className='glare';box.appendChild(gl);
+ let touching=false,last=0;
+ const set=(px,py,on)=>{const s=box.style;s.setProperty('--rx',((0.5-py)*20).toFixed(1)+'deg');s.setProperty('--ry',((px-0.5)*24).toFixed(1)+'deg');s.setProperty('--mx',(px*100).toFixed(0)+'%');s.setProperty('--my',(py*100).toFixed(0)+'%');s.setProperty('--mxn',(px*100).toFixed(0));s.setProperty('--gl',on?'1':'0');box.classList.toggle('live',on)};
+ const pos=e=>{const r=box.getBoundingClientRect();return[Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))]};
+ const move=e=>{if(document.querySelector('.slamming'))return;touching=true;box.classList.add('tilting');const[x,y]=pos(e);set(x,y,true)};
+ const end=()=>{touching=false;box.classList.remove('tilting');set(.5,.5,false)};
+ const ori=e=>{
+  if(!box.isConnected){window.removeEventListener('deviceorientation',ori);return}
+  if(touching||e.gamma==null||document.querySelector('.slamming'))return;
+  const now=performance.now();if(now-last<50)return;last=now;
+  set(.5+Math.max(-25,Math.min(25,e.gamma))/50,.5+Math.max(-25,Math.min(25,(e.beta||0)-50))/50,true);
+ };
+ const listen=()=>window.addEventListener('deviceorientation',ori);
+ box.addEventListener('pointermove',move);
+ box.addEventListener('pointerdown',e=>{move(e);const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==='function'&&!tiltify._asked){tiltify._asked=1;D.requestPermission().then(r=>{if(r==='granted')listen()}).catch(()=>{})}});
+ box.addEventListener('pointerleave',end);box.addEventListener('pointercancel',end);
+ box.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')end()});
+ if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission!=='function'&&matchMedia('(pointer:coarse)').matches)listen();
+}
+// ---------- Global achievement rarity: share of all recorded draws that earned each achievement ----------
+let ACH_STATS=null;
+const pctChip=a=>{
+ if(!ACH_STATS||ACH_STATS.total<30)return '';
+ const n=ACH_STATS.m[a.n]||0,p=n/ACH_STATS.total*100;
+ return `<span class="apc" title="Share of all recorded draws that earned this achievement">🌍 ${n?(p>=10?p.toFixed(0)+'%':p>=1?p.toFixed(1)+'%':'<1%'):'Nobody yet'}</span>`;
+};
+async function loadAchStats(){
+ if(typeof sbRest==='undefined'){ // offline preview: made-up numbers
+  const m={};ACH.forEach(a=>{const r=a.pts>=60?.004:a.pts>=40?.012:a.pts>=30?.03:a.pts>=20?.07:.15;m[a.n]=Math.round(1240*r*(.5+(hash('rar'+a.n)%100)/100))});
+  ACH_STATS={m,total:1240};return;
+ }
+ try{const c=JSON.parse(localStorage.getItem('mtgdle-astats')||'null');if(c&&Date.now()-c.t<3600e3){ACH_STATS=c.v;return}}catch(e){}
+ if(!SB_ON())return;
+ try{
+  const rows=await sbRest('ach_stats?select=name,n,total',{auth:false});
+  if(!rows||!rows.length)return;
+  const m={};rows.forEach(r=>m[r.name]=r.n);ACH_STATS={m,total:rows[0].total};
+  try{localStorage.setItem('mtgdle-astats',JSON.stringify({t:Date.now(),v:ACH_STATS}))}catch(e){}
+  const el=document.getElementById('ach');if(el&&!el.hidden&&typeof renderAch==='function')renderAch();
+ }catch(e){}
+}
+const foilCls=f=>f?' foilfx'+(f==='💎'?' etched':''):'';
+const weekStart=()=>{const d=new Date(today+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));return d.toISOString().slice(0,10)}; // Monday
+const lbBubs=(names,max)=>{const l=achList(names).filter(a=>!isFoilAch(a));if(!l.length)return '';
+ return `<div class="bubs">${l.slice(0,max).map(a=>`<span class="bub" style="--tc:${TIERS[tierOf(a)][1]}" title="${esc(a.n)} · +${a.pts}"><i>${a.e||'🏆'}</i>${esc(a.n)}</span>`).join('')}${l.length>max?`<span class="bub more">+${l.length-max} more</span>`:''}</div>`};
+// Pop-up for any leaderboard entry: the card, its score and every achievement it earned
+function openLbCard(r){
+ if(!r)return;
+ const its=achList(r.ach),nm=r.name||'Someone';
+ const rows=its.length?`<ul>${its.map(a=>`<li class="tr" style="--tc:${TIERS[tierOf(a)][1]}">${achBox(a)}</li>`).join('')}</ul>`:`<p class="sub">Achievement details were not saved for this card.</p>`;
+ const cols=(r.colors&&r.colors.length?r.colors:['C']).map(x=>`<span class="pip m-${x}">${x}</span>`).join('');
+ closeCard();
+ const m=document.createElement('div');m.id='cardmodal';m.className='modal';
+ m.innerHTML=`<div class="mbox" style="--fr:${frameColor(r.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${foilCls(r.foil)}">${r.img?`<img class="mimg" src="${esc(r.img)}" alt="${esc(r.card)}">`:`<div class="ph mimg">${esc(r.card)}</div>`}</div></div><div><div class="sub">Drawn ${esc(r.day||'')} by ${esc(nm)}${bdgHtml(r.badges)}${r.foil?` · ${r.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(r.card)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="score" style="font-size:2.6rem;margin-top:8px">${r.score.toLocaleString()}</div><div class="sub">points ${stTag(r.score)} · Top ${fmtPct(topPct(r.score))} of draws${its.length?` · ${its.length} achievement${its.length===1?'':'s'}`:''}</div>${rows}</div></div>`;
+ m.onclick=e=>{if(e.target===m)closeCard()};
+ m.querySelector('.mclose').onclick=closeCard;
+ document.body.appendChild(m);document.body.style.overflow='hidden';tiltify(m.querySelector('.cardbox'));
+}
+
+// One featured card (used at the top of the leaderboard and on the Home page)
+const featHtml=(f,label,me,showDay)=>{const fn=f.name||'Someone';
+ return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(f.day):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
+const lbWire=(el,rows)=>{el.querySelectorAll('.lbfeat .cardbox').forEach(tiltify);return lbWire0(el,rows)};
+const lbWire0=(el,rows)=>el.querySelectorAll('[data-i]').forEach(n=>{n.onclick=()=>openLbCard(rows[+n.dataset.i]);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLbCard(rows[+n.dataset.i])}}});
+const LB_MODES=[['day','Today'],['week','This week'],['all','All-time']];
+async function renderLb(){
+ const el=document.getElementById('lb'),msg=t=>`<p class="sub" style="text-align:center;padding:40px 0">${t}</p>`;
+ if(!SB_ON()){el.innerHTML=msg('The leaderboard is not set up yet.');return}
+ el.innerHTML='<div class="lbtabs"></div><div class="lbfeat sk"></div><div class="lbl">'+'<div class="lbr sk"></div>'.repeat(5)+'</div>';
+ try{
+  const rows=(await lbData(lbMode,lbLimit))||[],me=sbName();
+  const tg=`<div class="lbtabs">${LB_MODES.map(([k,l])=>`<button class="tab ${lbMode===k?'on':''}" data-m="${k}">${l}</button>`).join('')}</div>`;
+  let body;
+  if(!rows.length)body=msg('No scores yet. Draw a card to get on the board.');
+  else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr static${r.name===me?' me':''}"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}${bdgHtml(r.badges)}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
+  else{
+   body=featHtml(rows[0],lbMode==='week'?'BEST DRAW THIS WEEK':"TODAY'S BEST DRAW",me,lbMode==='week')+
+    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${lbMode==='week'&&r.day?' · '+esc(r.day):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
+  }
+  const more=rows.length>=lbLimit&&lbLimit<100?'<button class="tab lbmore" id="lbmore">Show more</button>':'';
   el.innerHTML=tg+body+more;
   el.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{lbMode=b.dataset.m;lbLimit=25;renderLb()});
   const mb=el.querySelector('#lbmore');if(mb)mb.onclick=()=>{lbLimit=100;renderLb()};
