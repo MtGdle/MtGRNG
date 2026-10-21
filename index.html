@@ -422,13 +422,80 @@ header b .rng{background:linear-gradient(180deg,#ffe38e,#e8a93a);-webkit-backgro
 .nur{margin-left:auto;font-weight:800;color:var(--mc);font-size:.76rem;white-space:nowrap;flex:none}
 .nurow .pbar{height:4px;margin-top:3px}
 .nurow .pbar b{background:var(--mc)}
+
+/* ---- First-time welcome ---- */
+.wel{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(8,6,14,.84);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fadein .25s ease both}
+.wbox{position:relative;width:100%;max-width:420px;max-height:calc(100vh - 36px);overflow-y:auto;text-align:center;padding:26px 22px 18px;border-radius:18px;background:var(--glass),#1c1828;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.wskip{position:absolute;z-index:3;top:10px;right:14px;background:none!important;border:0!important;box-shadow:none!important;color:var(--mut);font-family:var(--ui);font-size:.8rem;cursor:pointer;padding:4px 6px;text-decoration:underline}
+.wico{font-size:2.8rem;line-height:1;margin-bottom:6px}
+.wbox h2{margin:4px 0 8px;font-size:1.35rem}
+.wbox p{margin:0 0 10px;font-family:var(--ui);font-size:.92rem;line-height:1.5;color:#e4def6}
+.wvis{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 4px}
+.wpill{padding:3px 11px;border-radius:999px;font-family:var(--ui);font-size:.74rem;font-weight:700;border:1.5px solid var(--tc);color:var(--tc);background:rgba(0,0,0,.35)}
+.wmed{display:flex;gap:10px;justify-content:center;margin:12px 0 4px;font-family:var(--ui);font-size:.72rem;color:var(--mut)}
+.wmed span{display:flex;flex-direction:column;align-items:center;gap:2px}.wmed i{font-style:normal;font-size:1.5rem}
+.wdots{display:flex;gap:7px;justify-content:center;margin:14px 0 12px}
+.wdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);transition:background .2s,transform .2s}
+.wdots i.on{background:var(--ac);transform:scale(1.25)}
+.wnav{display:flex;gap:10px;justify-content:center}
+.wslide{animation:fadein .25s ease both}
+#howto{color:var(--mut);text-decoration:underline;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.wel,.wslide{animation:none}}
+
+/* ---- Booster pack reveal ---- */
+.packwrap{position:relative;display:flex;flex-direction:column;align-items:center;padding:34px 0 10px;user-select:none;-webkit-user-select:none}
+.pfloat{animation:pfloat 3s ease-in-out infinite}
+.packwrap.opening .pfloat{animation:none}
+@keyframes pfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.pack{--aura:#8a8aa0;--pulse:2.6s;position:relative;width:190px;height:290px;cursor:pointer;outline:none;touch-action:pan-y;transition:transform .15s;animation:packin .5s cubic-bezier(.2,.9,.3,1.2),packglow var(--pulse) ease-in-out .5s infinite}
+@keyframes packin{from{transform:translateY(-40px) scale(.88);opacity:0}to{transform:none;opacity:1}}
+@keyframes packglow{0%,100%{filter:drop-shadow(0 0 8px var(--aura))}50%{filter:drop-shadow(0 0 26px var(--aura))}}
+.pmain,.ptop{position:absolute;left:0;right:0;background:linear-gradient(135deg,#3b2f66 0%,#7a4fc4 22%,#e8b84a 45%,#7a4fc4 62%,#3b2f66 100%);background-size:220% 220%;animation:foilmove 5s linear infinite;border:1.5px solid rgba(255,255,255,.4);box-shadow:inset 0 0 22px rgba(0,0,0,.35)}
+@keyframes foilmove{from{background-position:0% 0%}to{background-position:220% 220%}}
+.pmain{top:0;bottom:0;border-radius:10px;z-index:2;clip-path:polygon(0 0,7% 0,14% 0,21% 0,28% 0,36% 0,43% 0,50% 0,57% 0,64% 0,71% 0,79% 0,86% 0,93% 0,100% 0,100% 100%,0 100%);transition:clip-path .12s}
+.pack.torn .pmain{clip-path:polygon(0 17%,7% 15.5%,14% 18%,21% 15.5%,28% 18.5%,36% 15.5%,43% 18%,50% 15%,57% 18.5%,64% 15.5%,71% 18%,79% 15.5%,86% 18.5%,93% 16%,100% 17.5%,100% 100%,0 100%)}
+.pmain::after,.ptop::before{content:'';position:absolute;left:0;right:0;height:12px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.3) 0 2px,rgba(255,255,255,.18) 2px 5px)}
+.pmain::after{bottom:0}.ptop::before{top:0}
+.ptop{top:0;height:17%;border-radius:10px 10px 0 0;border-bottom:0;z-index:3}
+.pcard{position:absolute;left:9%;right:9%;top:7%;bottom:5%;z-index:1;border-radius:10px;border:2px solid var(--ac);background:url(https://backs.scryfall.io/large/2/2/222b7a3b-2321-4d4c-af19-19338b134971.jpg) center/cover,radial-gradient(circle,#3b2f66 0 28%,#241c44 29% 60%,#17122b 61%);box-shadow:0 4px 14px #000a}
+.pshine{position:absolute;inset:0;z-index:5;border-radius:10px;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.4) 50%,transparent 65%);background-size:250% 100%;animation:pshine 2.8s ease-in-out infinite;mix-blend-mode:soft-light}
+@keyframes pshine{from{background-position:130% 0}to{background-position:-30% 0}}
+.plogo{position:absolute;top:27%;left:0;right:0;text-align:center;font-family:'Cinzel',Georgia,serif;font-weight:800;font-size:1.7rem;letter-spacing:.08em;color:#fff4d0;text-shadow:0 2px 4px #0009}
+.plogo b{color:#ffd76a}
+.pstar{position:absolute;top:41%;left:0;right:0;text-align:center;font-size:3.8rem;line-height:1;color:#ffe9a8;text-shadow:0 0 20px #ffd76a}
+.psub{position:absolute;bottom:15%;left:0;right:0;text-align:center;font-family:var(--ui);font-size:.68rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:#efe5c8}
+.phint{margin-top:24px;font-family:var(--ui);font-size:.82rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);animation:hintp 1.6s ease-in-out infinite}
+.packwrap.opening .phint{opacity:0;animation:none}
+.packwrap.opening.waiting .phint{opacity:1;animation:hintp 1.2s ease-in-out infinite}
+@keyframes hintp{0%,100%{opacity:.5}50%{opacity:1}}
+.pburst{position:absolute;left:50%;top:150px;width:0;height:0;pointer-events:none;z-index:6}
+.pburst i{position:absolute;left:0;top:0;display:block;border-radius:50%;will-change:transform,opacity;pointer-events:none}
+.pburst i.g{border-radius:0;font-style:normal;line-height:1;margin:-.5em 0 0 -.5em}
+@media (prefers-reduced-motion:reduce){.pfloat,.pack,.pmain,.ptop,.pshine,.phint{animation:none}}
+
+/* ---- Hold to charge reveal: a blank card outline that fills while you hold ---- */
+.chcard{--p:0;--aura:#8a8aa0;position:relative;width:190px;height:270px;border-radius:14px;border:3px solid rgba(255,255,255,.8);background:rgba(10,8,18,.55);overflow:hidden;cursor:pointer;outline:none;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;filter:drop-shadow(0 0 calc(6px + var(--p)*28px) var(--aura));animation:packin .5s cubic-bezier(.2,.9,.3,1.2)}
+.chfill{position:absolute;left:0;right:0;bottom:0;height:calc(var(--p)*100%);background:linear-gradient(0deg,#b8860b,#ffd76a);opacity:.92;transition:background .6s}
+.chfill::before{content:'';position:absolute;left:0;right:0;top:-3px;height:6px;background:rgba(255,255,255,.85);filter:blur(3px);opacity:calc(var(--p)*3)}
+.chcard i{position:absolute;display:block;border:2px solid rgba(255,255,255,.6);box-shadow:0 0 6px rgba(0,0,0,.5)}
+.chcard .t{left:8%;right:8%;top:5%;height:8%;border-radius:6px}
+.chcard .a{left:8%;right:8%;top:16%;height:38%;border-radius:4px}
+.chcard .y{left:8%;right:8%;top:57%;height:6%;border-radius:5px}
+.chcard .x{left:8%;right:8%;top:66%;height:21%;border-radius:4px}
+.chcard .p{right:8%;bottom:4%;width:20%;height:6%;border-radius:5px}
+.chtxt{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;z-index:3;font-family:'Cinzel',Georgia,serif;font-weight:800;font-size:1.5rem;letter-spacing:.14em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+.chcard.charged{animation:chpop .45s ease-out both}
+@keyframes chpop{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1.04)}}
+.chcard:focus-visible{outline:2px solid var(--ac);outline-offset:4px}
+@media (prefers-reduced-motion:reduce){.chcard,.chcard.charged{animation:none}}
+.dsrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 </style></head><body>
 <header><div class="hl"><b><span class="mtg">MtG</span><span class="rng">RNG</span></b><span class="hsub"><span>Daily card score</span><span class="dot">·</span><span class="sub" id="date"></span></span></div><button id="snd" class="tab" style="padding:2px 8px;margin:0" title="Sound on/off">🔊</button></header>
 <nav class="tabbar" id="tabbar"><button class="tab on" id="tabT"><i>🃏</i><span class="tl">Home</span><span class="tsh">Home</span></button><button class="tab" id="tabC"><i>🗂️</i><span class="tl">Collection</span><span class="tsh">Cards</span></button><button class="tab" id="tabA"><i>🏆</i><span class="tl">Achievements</span><span class="tsh">Awards</span></button><button class="tab" id="tabL" hidden><i>📊</i><span class="tl">Leaderboard</span><span class="tsh">Board</span></button><button class="tab" id="tabS"><i>🧪</i><span class="tl">Sandbox</span><span class="tsh">Lab</span></button><button class="tab" id="tabU"><i>👤</i><span class="tl">User</span><span class="tsh">You</span></button></nav>
 <div id="bg"><i style="--c:#f3edd0;--r:26vmax;--t:61s;--d:0s;opacity:.30"></i><i style="--c:#2b7bd9;--r:22vmax;--t:73s;--d:-15s"></i><i style="--c:#3a2a52;--r:28vmax;--t:67s;--d:-29s;opacity:.65"></i><i style="--c:#d9432b;--r:24vmax;--t:83s;--d:-47s"></i><i style="--c:#2c9a58;--r:30vmax;--t:79s;--d:-60s"></i></div>
 <div id="flash"></div>
 <main><div id="app" class="sub">Pulling today's card…</div><div id="coll" hidden></div><div id="ach" hidden></div><div id="lb" hidden></div><div id="usr" hidden></div><div id="sbp" hidden><div class="sbintro"><div class="sbt">🧪 Sandbox</div><div class="sub sbd">Practice as many times as you like. Scores here don't count.</div><button id="sbgo">Draw a card</button></div><div id="sbx"></div></div>
-<footer>Card data and images from Scryfall. MtGRNG is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.<br>Your scores and collection are saved in this browser. If you join the leaderboard, your display name and daily scores are stored publicly.</footer></main>
+<footer>Card data and images from Scryfall. MtGRNG is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.<br>Your scores and collection are saved in this browser. If you join the leaderboard, your display name and daily scores are stored publicly.<br><a href="#" id="howto">How it works</a></footer></main>
 <script>
 // ---- Public leaderboard (Supabase): paste your project URL and public anon key between the quotes. Leave empty to turn the leaderboard off. ----
 const SB_URL='https://xgkkjqrcnvhidzsadnkm.supabase.co';
@@ -1206,6 +1273,7 @@ async function renderUser(){
  const foils=cards.filter(([d,c])=>c.foil).length,allN=ACH.length+FOILS.length,bestDay=n?Math.max(...vals):0;
  const tile=(l,v,s)=>`<div class="ut"><div class="uv">${v}</div><div class="ul">${l}</div>${s?`<div class="us">${s}</div>`:''}</div>`;
  el.innerHTML=`<div class="setc" style="text-align:center"><div class="sub" id="uname">Player</div><div class="sub" style="font-size:.8rem;letter-spacing:.12em;margin-top:6px">TOTAL SCORE</div><div class="score" id="utot">${total.toLocaleString()}</div>${n?'':'<p class="sub">Draw your first card to start your score.</p>'}<div class="sub" id="urank"></div></div><div class="ugrid">${tile('Days played',n)}${tile('Best day',bestDay.toLocaleString(),n?stTag(bestDay):'')}${tile('Average day',(n?Math.round(total/n):0).toLocaleString())}${tile('Current streak',calcStreak(st.days))}${tile('Longest streak',longestStreak(st.days))}${tile('Cards collected',cards.length)}${tile('Foil cards',foils)}${tile('Achievements',got.size+' / '+allN)}</div>${bestEntry?`<div class="setc" style="margin-top:14px"><div class="sub">Best card</div><h3 style="margin:2px 0">${esc(bestEntry[1].name)}</h3><div class="sub">${bestEntry[0]} · ${bestEntry[1].score.toLocaleString()} pts ${stTag(bestEntry[1].score)}</div></div>`:''}`;
+ renderDrawStyle(el);
  if(SB_ON())renderBadgePicker(el);
  if(SB_ON()){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
   b.innerHTML=`<h3>Public leaderboard</h3><div class="sub">Pick a display name to share your daily scores. Everyone can see this name.</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="pname" maxlength="20" placeholder="Display name" value="${esc(sbName())}" style="flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit"><button class="tab" id="psave">Save name</button></div><div class="sub" id="pmsg" style="margin-top:6px"></div>`;
@@ -1307,7 +1375,7 @@ async function addBadges(rows){ // the all-time list comes from a view without b
 }
 async function lbData(mode,limit){
  if(mode==='all'){const rows=(await sbRest('all_time?order=total.desc&limit='+limit+'&select=name,total,best,days',{auth:false}))||[];await addBadges(rows);return rows}
- return lbQuery('daily_scores?'+(mode==='week'?'day=gte.'+weekStart():'day=eq.'+today)+'&order=score.desc&limit='+limit);
+ return lbQuery('daily_scores?'+(mode==='fame'?'':mode==='week'?'day=gte.'+weekStart():'day=eq.'+today)+'&order=score.desc&limit='+limit);
 }
 const topCardData=()=>lbQuery('daily_scores?day=eq.'+today+'&order=score.desc&limit=1');
 
@@ -1406,10 +1474,11 @@ function openLbCard(r){
 
 // One featured card (used at the top of the leaderboard and on the Home page)
 const featHtml=(f,label,me,showDay)=>{const fn=f.name||'Someone';
- return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(f.day):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
+ return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(fmtDay(f.day)):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
 const lbWire=(el,rows)=>{el.querySelectorAll('.lbfeat .cardbox').forEach(tiltify);return lbWire0(el,rows)};
 const lbWire0=(el,rows)=>el.querySelectorAll('[data-i]').forEach(n=>{n.onclick=()=>openLbCard(rows[+n.dataset.i]);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLbCard(rows[+n.dataset.i])}}});
-const LB_MODES=[['day','Today'],['week','This week'],['all','All-time']];
+const fmtDay=d=>{try{return new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}catch(e){return d}};
+const LB_MODES=[['day','Today'],['week','This week'],['all','All-time'],['fame','🏛️ Hall of Fame']];
 async function renderLb(){
  const el=document.getElementById('lb'),msg=t=>`<p class="sub" style="text-align:center;padding:40px 0">${t}</p>`;
  if(!SB_ON()){el.innerHTML=msg('The leaderboard is not set up yet.');return}
@@ -1421,8 +1490,8 @@ async function renderLb(){
   if(!rows.length)body=msg('No scores yet. Draw a card to get on the board.');
   else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr static${r.name===me?' me':''}"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}${bdgHtml(r.badges)}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
   else{
-   body=featHtml(rows[0],lbMode==='week'?'BEST DRAW THIS WEEK':"TODAY'S BEST DRAW",me,lbMode==='week')+
-    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${lbMode==='week'&&r.day?' · '+esc(r.day):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
+   body=(lbMode==='fame'?'<div class="sub" style="text-align:center;margin:0 0 10px">The highest-scoring draws ever recorded.</div>':'')+featHtml(rows[0],lbMode==='fame'?'BEST DRAW OF ALL TIME':lbMode==='week'?'BEST DRAW THIS WEEK':"TODAY'S BEST DRAW",me,lbMode==='week'||lbMode==='fame')+
+    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${lbMode==='fame'&&i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${(lbMode==='week'||lbMode==='fame')&&r.day?' · '+esc(fmtDay(r.day)):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
   }
   const more=rows.length>=lbLimit&&lbLimit<100?'<button class="tab lbmore" id="lbmore">Show more</button>':'';
   el.innerHTML=tg+body+more;
@@ -1480,16 +1549,180 @@ async function randomCard(){
  await fetchArtTags(c);
  return c;
 }
+// ---------- Booster pack reveal: tear open a foil pack, a burst themed by the card's colors, a glow that hints at the rarity ----------
+function peekScore(c,roll){ // the same score render() will compute, so the pack's glow can hint at the tier
+ const earned=ACH.filter(a=>{try{return a.t(c)}catch(e){return false}}),tops={};
+ earned.forEach(a=>{if(a.g&&(!tops[a.g]||a.pts>=tops[a.g].pts))tops[a.g]=a});
+ return earned.filter(a=>!a.g||tops[a.g]===a).reduce((s,a)=>s+a.pts,0)+(roll<3?60:roll<18?30:0);
+}
+const BURSTS={
+ W:{c:['#fff7d6','#ffe9a8','#ffffff'],m:'rays'},
+ U:{c:['#58a0dc','#9fd8ff','#2d6fb0'],m:'ripple'},
+ B:{c:['#8a6aa8','#3a2b4a','#bfa0d9'],m:'smoke'},
+ R:{c:['#ff7a3a','#ffb347','#e8452c'],m:'flame'},
+ G:{c:['#46aa64','#8bd36e','#2f7a45'],m:'leaves'},
+ C:{c:['#d8d8e6','#ffffff','#b8b8cc'],m:'sparkle'},
+ M:{c:['#ff6b6b','#ffd76a','#6bffb0','#6bb8ff','#c46bff'],m:'prism'}
+};
+const burstKey=cols=>!cols||!cols.length?'C':cols.length>1?'M':(BURSTS[cols[0]]?cols[0]:'C');
+function packBurst(host,key,tier,cols){
+ const th=BURSTS[key],pal=key==='M'&&cols&&cols.length?cols.map(x=>(BURSTS[x]||BURSTS.C).c[0]):th.c;
+ const o=document.createElement('div');o.className='pburst';host.appendChild(o);
+ const R=(a,b)=>a+Math.random()*(b-a),P=a=>a[Math.floor(Math.random()*a.length)],n=14+tier*5;
+ const el=(css,cls)=>{const e=document.createElement('i');if(cls)e.className=cls;e.style.cssText=css;o.appendChild(e);return e};
+ const go=(e,kf,d,ease,delay)=>e.animate(kf,{duration:d,easing:ease||'ease-out',delay:delay||0,fill:'forwards'});
+ const glyph=(g,col,size,dx,dy,rot,d,delay)=>{const e=el(`font-size:${size}px;color:${col||'inherit'};${col?`text-shadow:0 0 8px ${col}`:''}`,'g');e.textContent=g;go(e,[{transform:'translate(0,0) scale(.3) rotate(0deg)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(1) rotate(${rot}deg)`,opacity:1,offset:.6},{transform:`translate(${dx*1.15}px,${dy*1.15+30}px) scale(.6) rotate(${rot*1.4}deg)`,opacity:0}],d,'cubic-bezier(.2,.7,.3,1)',delay)};
+ const dot=(col,size,dx,dy,d,delay)=>{const e=el(`width:${size}px;height:${size}px;margin:${-size/2}px 0 0 ${-size/2}px;background:${col};box-shadow:0 0 ${size*1.6}px ${col}`);go(e,[{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.2)`,opacity:0}],d,'cubic-bezier(.15,.7,.3,1)',delay)};
+ go(el(`width:360px;height:360px;margin:-180px 0 0 -180px;background:radial-gradient(circle,${pal[0]}cc,${pal[0]}00 65%)`),[{transform:'scale(.1)',opacity:1},{transform:'scale(1.5)',opacity:0}],900);
+ switch(th.m){
+  case 'rays':
+   go(el(`width:560px;height:560px;margin:-280px 0 0 -280px;background:repeating-conic-gradient(rgba(255,247,214,.95) 0 4deg,transparent 4deg 15deg);-webkit-mask-image:radial-gradient(circle,#000 8%,transparent 68%);mask-image:radial-gradient(circle,#000 8%,transparent 68%)`),[{transform:'scale(.2) rotate(0deg)',opacity:1},{transform:'scale(1.3) rotate(40deg)',opacity:0}],900);
+   for(let k=0;k<n;k++)glyph('✦',P(pal),R(12,22),R(-90,90),R(30,150),R(-40,40),R(800,1200),R(0,250));break;
+  case 'ripple':
+   for(let k=0;k<3;k++)go(el(`width:70px;height:70px;margin:-35px 0 0 -35px;border:3px solid ${pal[1]};box-shadow:0 0 14px ${pal[0]}`),[{transform:'scale(.3)',opacity:1},{transform:'scale(5)',opacity:0}],900,'ease-out',k*140);
+   for(let k=0;k<n;k++)dot(P(pal),R(5,11),R(-110,110),R(-130,-20),R(700,1100),R(0,200));break;
+  case 'smoke':
+   for(let k=0;k<7;k++)go(el(`width:${R(90,150)}px;height:${R(90,150)}px;margin:-60px 0 0 -60px;background:${P(pal)};filter:blur(16px)`),[{transform:'translate(0,0) scale(.2)',opacity:.85},{transform:`translate(${R(-90,90)}px,${R(-100,60)}px) scale(1.9)`,opacity:0}],R(900,1300));
+   for(let k=0;k<n/2;k++)dot(pal[2],R(3,7),R(-120,120),R(-120,40),R(700,1000),R(0,200));break;
+  case 'flame':
+   for(let k=0;k<n+10;k++)dot(P(pal),R(14,30),R(-90,90),R(-230,-60),R(650,1100),R(0,250));
+   for(let k=0;k<6;k++)glyph('✦',pal[1],R(12,20),R(-70,70),R(-120,-30),R(-30,30),R(700,1000),R(0,200));break;
+  case 'leaves':
+   for(let k=0;k<n;k++)glyph('🍃',null,R(18,28),R(-130,130),R(-90,60),R(-180,180),R(1000,1500),R(0,300));break;
+  case 'prism':
+   go(el(`width:260px;height:260px;margin:-130px 0 0 -130px;background:conic-gradient(#ff5e5e,#ffd76a,#6bffb0,#6bb8ff,#c46bff,#ff5e5e);-webkit-mask-image:radial-gradient(circle,transparent 52%,#000 54% 70%,transparent 72%);mask-image:radial-gradient(circle,transparent 52%,#000 54% 70%,transparent 72%)`),[{transform:'scale(.3) rotate(0deg)',opacity:1},{transform:'scale(2.4) rotate(160deg)',opacity:0}],1000);
+   for(let k=0;k<n;k++)glyph('✦',P(pal),R(12,22),R(-120,120),R(-110,70),R(-60,60),R(800,1200),R(0,250));break;
+  default:
+   for(let k=0;k<n;k++)glyph('✦',P(pal),R(12,24),R(-110,110),R(-110,80),R(-60,60),R(800,1200),R(0,250));
+ }
+ if(tier>=4)go(el(`position:fixed;left:0;top:0;width:100vw;height:100vh;margin:0;border-radius:0;background:${tier===5?'#ffd0ee':'#ffffff'}`),[{opacity:tier===5?.85:.6},{opacity:0}],450);
+ setTimeout(()=>o.remove(),2000);
+}
+// ---------- Draw style: booster pack (default) or hold-to-charge; add ?reveal=charge to the address to try it quickly ----------
+const revealStyle=()=>{try{const q=new URLSearchParams(location.search).get('reveal');if(q==='charge'||q==='pack')return q}catch(e){}try{return localStorage.getItem('mtgdle-reveal')==='charge'?'charge':'pack'}catch(e){return 'pack'}};
+function renderDrawStyle(el){
+ const old=document.getElementById('drawstyle');if(old)old.remove();
+ const cur=revealStyle(),box=document.createElement('div');box.id='drawstyle';box.className='setc';box.style.marginTop='14px';
+ box.innerHTML=`<h3>Draw style</h3><div class="sub">How your daily card is revealed.</div><div class="dsrow"><button class="tab ${cur==='pack'?'on':''}" data-s="pack">🃏 Booster pack</button><button class="tab ${cur==='charge'?'on':''}" data-s="charge">⚡ Hold to charge</button></div>`;
+ el.appendChild(box);
+ box.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('mtgdle-reveal',b.dataset.s)}catch(e){}renderDrawStyle(el)});
+}
+const CHARGE_FILL={W:'#f4efd0',U:'#58a0dc',B:'#8a6aa8',R:'#e8452c',G:'#46aa64'};
+async function openCharge(host,cardP,o){
+ o=o||{};
+ const rm=matchMedia('(prefers-reduced-motion: reduce)').matches,wait=ms=>new Promise(r=>setTimeout(r,ms));
+ cardP.catch(()=>{});
+ if(rm){host.innerHTML='<p class="sub" style="text-align:center;padding:60px 0">Drawing your card…</p>';const [c]=await Promise.all([cardP,wait(200)]);return c}
+ const MS=o.ms||1400;
+ host.innerHTML='<div class="packwrap chwrap"><div class="pfloat"><div class="chcard" role="button" tabindex="0" aria-label="Press and hold to charge your card"><div class="chfill"></div><i class="t"></i><i class="a"></i><i class="y"></i><i class="x"></i><i class="p"></i><div class="chtxt">HOLD</div></div></div><div class="phint">Press and hold to charge</div></div>';
+ const wrap=host.querySelector('.packwrap'),card=host.querySelector('.chcard'),fill=host.querySelector('.chfill'),txt=host.querySelector('.chtxt'),hint=host.querySelector('.phint');
+ let p=0,down=false,done=false,skipIt,last=performance.now(),osc=null,og=null,vib=0;
+ const skipP=new Promise(r=>skipIt=r),sleep=ms=>Promise.race([wait(ms),skipP]);
+ const skipH=()=>{if(done)skipIt()};
+ host.addEventListener('pointerdown',skipH);
+ // rising tone while charging
+ const tone=on=>{if(on){if(osc||!SND)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();osc=AC.createOscillator();og=AC.createGain();osc.type='sawtooth';osc.frequency.value=140;og.gain.value=.0001;osc.connect(og);og.connect(AC.destination);osc.start();og.gain.exponentialRampToValueAtTime(.045,AC.currentTime+.1)}catch(e){osc=null}}else if(osc){try{og.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.08);osc.stop(AC.currentTime+.1)}catch(e){}osc=null}};
+ let started=false;
+ const press=()=>{if(done)return;down=true;started=true;tone(true);hint.textContent='Keep holding…'};
+ const release=()=>{if(done)return;down=false;tone(false);if(p<1)hint.textContent='Press and hold to charge'};
+ wrap.addEventListener('pointerdown',e=>{if(e.target.closest('.phint')&&false)return;press();try{wrap.setPointerCapture(e.pointerId)}catch(x){}});
+ ['pointerup','pointercancel'].forEach(ev=>wrap.addEventListener(ev,release));
+ card.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.repeat){e.preventDefault();press()}});
+ card.addEventListener('keyup',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();release()}});
+ try{card.focus({preventScroll:true})}catch(e){}
+ const autoAt=performance.now()+(o.auto||5000); // charges by itself if nobody holds the card
+ // rarity tell and color tint once the card is known
+ cardP.then(c=>{try{
+  const t=stOf(o.peek?o.peek(c):0);card.style.setProperty('--aura',STIERS[t][1]);
+  const cols=c.colors||(c.card_faces&&c.card_faces[0]&&c.card_faces[0].colors)||[];
+  fill.style.background=!cols.length?'linear-gradient(0deg,#8f8fa0,#eeeef6)':cols.length===1?`linear-gradient(0deg,${CHARGE_FILL[cols[0]]||'#aaa'},#ffffff55),${CHARGE_FILL[cols[0]]||'#aaa'}`:`linear-gradient(0deg,${cols.map(x=>CHARGE_FILL[x]||'#aaa').join(',')})`;
+ }catch(e){}},()=>{});
+ await new Promise(res=>{
+  const frame=t=>{
+   const dt=Math.min(64,t-last);last=t;
+   const auto=!started&&t>=autoAt;
+   if(down||auto)p=Math.min(1,p+dt/MS);else p=Math.max(0,p-dt/(MS*.35));
+   card.style.setProperty('--p',p.toFixed(3));
+   if(p>0){txt.textContent=Math.round(p*100)+'%';card.style.transform=p>.02?`translate(${((Math.random()-.5)*p*4).toFixed(1)}px,${((Math.random()-.5)*p*4).toFixed(1)}px) scale(${(1+p*.04).toFixed(3)})`:''}else{txt.textContent='HOLD';card.style.transform=''}
+   if(osc)try{osc.frequency.value=140+p*560}catch(e){}
+   if(navigator.vibrate&&SND&&(down||auto)&&t-vib>140){vib=t;try{navigator.vibrate(8)}catch(e){}}
+   if(p>=1){res();return}
+   requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+ });
+ done=true;tone(false);card.style.transform='';card.classList.add('charged');wrap.classList.add('opening');txt.textContent='';
+ beep([523,784],.06,'triangle',.09);
+ if(navigator.vibrate&&SND)try{navigator.vibrate(30)}catch(e){}
+ await sleep(280);
+ const isReady=await Promise.race([cardP.then(()=>true,()=>true),wait(40).then(()=>false)]);
+ if(!isReady){hint.textContent='Pulling your card…';wrap.classList.add('waiting')}
+ const c=await cardP;
+ wrap.classList.remove('waiting');
+ const cols=c.colors||(c.card_faces&&c.card_faces[0]&&c.card_faces[0].colors)||[];
+ let tier=0;try{tier=stOf(o.peek?o.peek(c):0)}catch(e){}
+ packBurst(wrap,burstKey(cols),tier,cols);
+ beep(tier>=4?[523,659,784,1046,1318]:tier>=2?[523,659,784,1046]:[660,880],.09,'triangle',.1);
+ if(navigator.vibrate&&SND)try{navigator.vibrate(tier>=2?[40,30,70]:25)}catch(e){}
+ await sleep(650+tier*80);
+ host.removeEventListener('pointerdown',skipH);
+ return c;
+}
+let _dailyPre=null;
+function prefetchDaily(){ // start loading today's card (and its art tags) while the player reads the Home page, so the pack can open straight away
+ if(_dailyPre||loadSt().days[today]!==undefined)return;
+ _dailyPre=dailyCard().then(async c=>{await preload(imgOf(c));return c});
+ _dailyPre.catch(()=>{_dailyPre=null});
+}
+async function openPack(host,cardP,o){
+ o=o||{};
+ const rm=matchMedia('(prefers-reduced-motion: reduce)').matches,wait=ms=>new Promise(r=>setTimeout(r,ms));
+ cardP.catch(()=>{});
+ if(rm){host.innerHTML='<p class="sub" style="text-align:center;padding:60px 0">Drawing your card…</p>';const [c]=await Promise.all([cardP,wait(200)]);return c}
+ host.innerHTML='<div class="packwrap"><div class="pfloat"><div class="pack" role="button" tabindex="0" aria-label="Open your pack"><div class="pcard"></div><div class="pmain"><div class="plogo">MtG<b>RNG</b></div><div class="pstar">★</div><div class="psub">Daily pack</div></div><div class="ptop"></div><div class="pshine"></div></div></div><div class="phint">Tap or swipe to open</div></div>';
+ const wrap=host.querySelector('.packwrap'),pack=host.querySelector('.pack'),top=host.querySelector('.ptop'),card=host.querySelector('.pcard');
+ let opened=false,skipIt,tapped,sx=null;
+ const skipP=new Promise(r=>skipIt=r),tapP=new Promise(r=>tapped=r),sleep=ms=>Promise.race([wait(ms),skipP]);
+ const skipH=()=>{if(opened)skipIt()};
+ host.addEventListener('pointerdown',skipH);
+ const timer=setTimeout(()=>tapped(),o.auto||2800); // opens by itself if nobody taps
+ cardP.then(c=>{try{const t=stOf(o.peek?o.peek(c):0);pack.style.setProperty('--aura',STIERS[t][1]);pack.style.setProperty('--pulse',(2.6-t*.35)+'s');pack.dataset.tier=t}catch(e){}},()=>{}); // rarity tell: the glow takes the tier's color
+ pack.addEventListener('pointerdown',e=>{sx=e.clientX;try{pack.setPointerCapture(e.pointerId)}catch(x){}});
+ pack.addEventListener('pointermove',e=>{if(sx===null||opened)return;const dx=e.clientX-sx;pack.style.transform='rotate('+Math.max(-12,Math.min(12,dx/10))+'deg)';if(Math.abs(dx)>60)tapped()});
+ pack.addEventListener('pointerup',()=>tapped());
+ pack.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tapped()}});
+ try{pack.focus({preventScroll:true})}catch(e){}
+ await tapP;clearTimeout(timer);opened=true;
+ pack.style.transform='';pack.classList.add('torn');wrap.classList.add('opening');
+ beep([180,140,110],.05,'sawtooth',.08);setTimeout(()=>beep([880,1320],.05,'triangle',.07),110);
+ if(navigator.vibrate&&SND)try{navigator.vibrate(30)}catch(e){}
+ top.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:'translate(-30px,-60px) rotate(-26deg)',opacity:0}],{duration:520,easing:'cubic-bezier(.3,0,.6,1)',fill:'forwards'});
+ await sleep(380);
+ const isReady=await Promise.race([cardP.then(()=>true,()=>true),wait(40).then(()=>false)]);
+ if(!isReady){const h=host.querySelector('.phint');if(h)h.textContent='Pulling your card…';wrap.classList.add('waiting')}
+ const c=await cardP;
+ wrap.classList.remove('waiting');
+ const cols=c.colors||(c.card_faces&&c.card_faces[0]&&c.card_faces[0].colors)||[];
+ let tier=0;try{tier=stOf(o.peek?o.peek(c):0)}catch(e){}
+ card.style.zIndex=4;
+ card.animate([{transform:'translateY(0) scale(1)'},{transform:'translateY(-120px) scale(1.12)'}],{duration:560,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});
+ await sleep(260);
+ packBurst(wrap,burstKey(cols),tier,cols);
+ beep(tier>=4?[523,659,784,1046,1318]:tier>=2?[523,659,784,1046]:[660,880],.09,'triangle',.1);
+ if(navigator.vibrate&&SND)try{navigator.vibrate(tier>=2?[40,30,70]:25)}catch(e){}
+ await sleep(650+tier*80);
+ host.removeEventListener('pointerdown',skipH);
+ return c;
+}
 async function sbDraw(){const intro=document.querySelector('.sbintro');if(intro)intro.classList.add('compact');
  const box=document.getElementById('sbx'),btn=document.getElementById('sbgo'),wait=ms=>new Promise(r=>setTimeout(r,ms)),rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
  btn.disabled=true;
  if(!rm){document.body.classList.add('calm');setTimeout(()=>document.body.classList.remove('calm'),9000)}
- box.innerHTML=`<div class="deck">${[0,1,2,3,4,5].map(i=>`<div class="cb" style="--i:${i}"></div>`).join('')}</div>`;
  try{
-  const [c]=await Promise.all([randomCard().then(async c=>{await preload(imgOf(c));return c}),wait(rm?200:1400)]);
-  box.querySelector('.deck .cb:last-child').classList.add('pull');
-  if(!rm){await wait(520);box.classList.add('fadeout');await wait(200)}
-  render(c,{sandbox:true});
+  const roll=Math.floor(Math.random()*100),cardP=randomCard().then(async c=>{await preload(imgOf(c));return c});
+  const c=await (revealStyle()==='charge'?openCharge:openPack)(box,cardP,{peek:c=>peekScore(c,roll),auto:5000});
+  if(!rm){box.classList.add('fadeout');await wait(200)}
+  render(c,{sandbox:true,roll});
   box.classList.remove('fadeout');
  }catch(e){box.classList.remove('fadeout');document.body.classList.remove('calm');box.textContent='Could not load card: '+e.message}
  btn.disabled=false;
@@ -1621,7 +1854,7 @@ async function shareResult(btnId,o){
 function render(c,o){o=o||{};const SB=!!o.sandbox,P=SB?'s-':'',root=document.getElementById(SB?'sbx':'app');
  const earned=ACH.filter(a=>a.t(c)), tops={};
  earned.forEach(a=>{if(a.g&&(!tops[a.g]||a.pts>=tops[a.g].pts))tops[a.g]=a}); // only the highest achievement in each ladder counts (ties go to the later one)
- const hits=earned.filter(a=>!a.g||tops[a.g]===a), roll=SB?Math.floor(Math.random()*100):hash('foil-'+today+'-'+(window._uid||''))%100;
+ const hits=earned.filter(a=>!a.g||tops[a.g]===a), roll=SB?(o.roll!==undefined?o.roll:Math.floor(Math.random()*100)):hash('foil-'+today+'-'+(window._uid||''))%100;
  const foil=roll<3?{n:'Etched Foil',pts:60,e:'💎'}:roll<18?{n:'Foil',pts:30,e:'✨'}:null;
  const score=hits.reduce((s,a)=>s+a.pts,0)+(foil?foil.pts:0);
  const img=(c.image_uris||c.card_faces?.[0]?.image_uris||{}).normal||'';
@@ -1673,12 +1906,54 @@ function render(c,o){o=o||{};const SB=!!o.sandbox,P=SB?'s-':'',root=document.get
  document.getElementById(P+'shc').onclick=()=>copyShare(shareText(shareObj),document.getElementById(P+'shc'));
  document.getElementById(P+'shi').onclick=()=>saveShareImage(shareObj);
 }
+// ---------- First-time welcome: a short intro shown once to new players, reopenable from the footer ----------
+function welSlides(){
+ const tiers=STIERS.map(t=>`<span class="wpill" style="--tc:${t[1]}">${t[0]}</span>`).join('');
+ const meds=MEDALS.map(m=>`<span><i>${m.e}</i>${m.n}×</span>`).join('');
+ const bd=achList(['Moonlit','Haunted House','Palindrome Name']).map(a=>bdgOne(a,'lg')).join('');
+ return[
+  {i:'🃏',h:'One card a day',p:'Every day you draw one random Magic card, picked just for you. Tap <b>Draw a card</b> and see what you get.'},
+  {i:'🏆',h:'Earn points and a tier',p:'Your card earns points for every achievement it meets: its art, its name, its text, its price and more. The total sets its tier, and "Top X%" shows how rare your pull is.',v:`<div class="wvis">${tiers}</div>`},
+  {i:'🥇',h:'Rank up medals',p:'Earn the same achievement again and again to rank up its medal. Pick up to 3 of your favorites as badges to wear beside your name.',v:`<div class="wmed">${meds}</div>${bd?`<div class="wvis">${bd}</div>`:''}`},
+  {i:'📊',h:'Climb the leaderboard',p:'Choose a display name on the Home page to join the daily leaderboard, then share your result with friends. Your scores and collection are saved in this browser.'}
+ ];
+}
+function closeWelcome(){const w=document.getElementById('welcome');if(w)w.remove();document.body.style.overflow='';document.removeEventListener('keydown',welKey);try{localStorage.setItem('mtgdle-welcome','1')}catch(e){}const g=document.getElementById('gen');if(g&&g.focus)g.focus({preventScroll:true})}
+function welKey(e){const w=document.getElementById('welcome');if(!w)return;if(e.key==='Escape')closeWelcome();else if(e.key==='ArrowRight')w.querySelector('#wnext').click();else if(e.key==='ArrowLeft'){const b=w.querySelector('#wback');if(b&&!b.hidden)b.click()}}
+function openWelcome(){
+ if(document.getElementById('welcome'))return;
+ const sl=welSlides();let i=0;
+ const w=document.createElement('div');w.id='welcome';w.className='wel';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');w.setAttribute('aria-label','Welcome to MtGRNG');
+ w.innerHTML='<div class="wbox"><button class="wskip" id="wskip">Skip</button><div id="wbody"></div><div class="wdots" id="wdots"></div><div class="wnav"><button class="tab" id="wback">Back</button><button class="tab on" id="wnext">Next</button></div></div>';
+ const draw=()=>{
+  const s=sl[i],last=i===sl.length-1;
+  w.querySelector('#wbody').innerHTML=`<div class="wslide"><div class="wico">${s.i}</div><h2>${s.h}</h2><p>${s.p}</p>${s.v||''}</div>`;
+  w.querySelector('#wdots').innerHTML=sl.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+  w.querySelector('#wback').hidden=i===0;
+  w.querySelector('#wnext').textContent=last?'Draw my first card':'Next';
+  w.querySelector('#wskip').hidden=last;
+ };
+ w.querySelector('#wnext').onclick=()=>{if(i<sl.length-1){i++;draw()}else closeWelcome()};
+ w.querySelector('#wback').onclick=()=>{if(i>0){i--;draw()}};
+ w.querySelector('#wskip').onclick=closeWelcome;
+ w.onclick=e=>{if(e.target===w)closeWelcome()};
+ document.body.appendChild(w);document.body.style.overflow='hidden';document.addEventListener('keydown',welKey);
+ draw();w.querySelector('#wnext').focus({preventScroll:true});
+}
+function maybeWelcome(){
+ let seen=false;try{seen=!!localStorage.getItem('mtgdle-welcome')}catch(e){}
+ if(seen)return;
+ // players who already have saved days do not need the intro; remember that so it never appears
+ if(Object.keys(loadSt().days).length){try{localStorage.setItem('mtgdle-welcome','1')}catch(e){}return}
+ openWelcome();
+}
 document.getElementById('date').textContent=today;
 const sb=document.getElementById('snd');sb.textContent=SND?'🔊':'🔇';sb.onclick=()=>{SND=!SND;sb.textContent=SND?'🔊':'🔇';try{localStorage.setItem('mtgdle-snd',SND?'on':'off')}catch(e){}};
 document.getElementById('tabT').onclick=()=>showTab('T');document.getElementById('tabC').onclick=()=>showTab('C');document.getElementById('tabA').onclick=()=>showTab('A');document.getElementById('tabS').onclick=()=>showTab('S');document.getElementById('tabU').onclick=()=>showTab('U');document.getElementById('tabL').onclick=()=>showTab('L');if(SB_ON())document.getElementById('tabL').hidden=false;
 document.getElementById('sbgo').onclick=sbDraw;
+document.getElementById('howto').onclick=e=>{e.preventDefault();openWelcome()};
 const drawnToday=loadSt().days[today]!==undefined;
-document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();loadAchStats();
+document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();maybeWelcome();prefetchDaily();loadAchStats();
 document.getElementById('gen').onclick=async()=>{
  const app=document.getElementById('app'),wait=ms=>new Promise(r=>setTimeout(r,ms));
  const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1688,11 +1963,10 @@ document.getElementById('gen').onclick=async()=>{
   return;
  }
  if(!rm){document.body.classList.add('calm');setTimeout(()=>document.body.classList.remove('calm'),9000)} // pause the busy background while the cards animate
- app.innerHTML=`<div class="deck">${[0,1,2,3,4,5].map(i=>`<div class="cb" style="--i:${i}"></div>`).join('')}</div><div class="sub" style="text-align:center">Shuffling the deck…</div>`;
  try{
-  const [c]=await Promise.all([dailyCard().then(async c=>{await preload(imgOf(c));return c}),wait(rm?200:2200)]);
-  app.querySelector('.deck .cb:last-child').classList.add('pull');
-  if(!rm){await wait(520);app.classList.add('fadeout');await wait(200)}
+  const cardP=_dailyPre||dailyCard().then(async c=>{await preload(imgOf(c));return c});
+  const c=await (revealStyle()==='charge'?openCharge:openPack)(app,cardP,{peek:c=>peekScore(c,hash('foil-'+today+'-'+(window._uid||''))%100),auto:5000});
+  if(!rm){app.classList.add('fadeout');await wait(200)}
   render(c);
   app.classList.remove('fadeout');
  }catch(e){app.classList.remove('fadeout');document.body.classList.remove('calm');app.textContent='Could not load card: '+e.message}
