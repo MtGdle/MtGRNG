@@ -1599,7 +1599,7 @@ function packBurst(host,key,tier,cols){
  setTimeout(()=>o.remove(),2000);
 }
 // ---------- Draw style: booster pack (default) or hold-to-charge; add ?reveal=charge to the address to try it quickly ----------
-const revealStyle=()=>{try{const q=new URLSearchParams(location.search).get('reveal');if(q==='charge'||q==='pack')return q}catch(e){}try{return localStorage.getItem('mtgdle-reveal')==='charge'?'charge':'pack'}catch(e){return 'pack'}};
+const revealStyle=()=>{try{const q=new URLSearchParams(location.search).get('reveal');if(q==='charge'||q==='pack')return q}catch(e){}try{return localStorage.getItem('mtgdle-reveal')==='pack'?'pack':'charge'}catch(e){return 'charge'}};
 function renderDrawStyle(el){
  const old=document.getElementById('drawstyle');if(old)old.remove();
  const cur=revealStyle(),box=document.createElement('div');box.id='drawstyle';box.className='setc';box.style.marginTop='14px';
