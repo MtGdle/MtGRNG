@@ -965,7 +965,24 @@ const ACH=[
 // ---- Daily pick: same card for everyone, based on UTC date ----
 const today=new Date().toISOString().slice(0,10);
 function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-async function sf(u){const r=await fetch(u,{headers:{Accept:'application/json;q=0.9,*/*;q=0.8'}});if(!r.ok)throw new Error('Scryfall '+r.status);return r.json()}
+// Every Scryfall request goes through one queue spaced 120ms apart (Scryfall allows about 10 a second; going over makes it refuse
+// everything for a while, which browsers report as "Load failed"). A refused request is retried after a pause.
+let _sfLast=0,_sfQ=Promise.resolve();
+const sfSlot=()=>{const mine=_sfQ.then(async()=>{const d=_sfLast+120-Date.now();if(d>0)await new Promise(r=>setTimeout(r,d));_sfLast=Date.now()});_sfQ=mine;return mine}; // requests leave one at a time, at least 120ms apart
+async function sfFetch(u){
+ for(let k=0;;k++){
+  await sfSlot();
+  try{
+   const r=await fetch(u,{headers:{Accept:'application/json;q=0.9,*/*;q=0.8'}});
+   if((r.status===429||r.status>=500)&&k<2){_sfLast=Date.now()+1500*(k+1);continue}
+   return r;
+  }catch(e){
+   if(k>=2)throw e;
+   _sfLast=Date.now()+1500*(k+1);
+  }
+ }
+}
+async function sf(u){const r=await sfFetch(u);if(!r.ok)throw new Error('Scryfall '+r.status);return r.json()}
 const ART_GROUPS={sunset:['sunset','sunrise'],sun:['sun'],moon:['moon'],storm:['lightning','storm','rain'],snow:['snow'],fire:['fire'],volcano:['volcano','lava'],cave:['cave'],castle:['castle','tower'],ruins:['ruins','statue'],skeleton:['skeleton','skull'],ghost:['ghost'],mushroom:['mushroom'],book:['book'],tree:['tree','forest'],dragon:['dragon'],sword:['sword']}; // one Scryfall request per group, so related tags share a single lookup
 const ART_KEYS=['hat',...ART_ANIMALS,...Object.keys(ART_GROUPS)];
 const artQ=k=>{const l=ART_GROUPS[k]||[k];return l.length>1?'('+l.map(t=>'art:'+t).join(' or ')+')':'art:'+l[0]};
@@ -979,13 +996,13 @@ async function fetchArtTags(c){
  const check=async t=>{
   try{
    const q='e:'+c.set+' cn:"'+c.collector_number+'" '+artQ(t);
-   const r=await fetch('https://api.scryfall.com/cards/search?unique=prints&q='+encodeURIComponent(q),{headers:{Accept:'application/json;q=0.9,*/*;q=0.8'}});
+   const r=await sfFetch('https://api.scryfall.com/cards/search?unique=prints&q='+encodeURIComponent(q));
    if(r.status===404)return false;
    if(!r.ok)return null;
    const j=await r.json();return (j.total_cards||0)>0;
   }catch(e){return null}
  };
- const res=await Promise.race([Promise.all(ART_KEYS.map((t,i)=>wait(i*100).then(()=>check(t)))),wait(7000).then(()=>null)]);
+ const res=await Promise.race([Promise.all(ART_KEYS.map(t=>check(t))),wait(14000).then(()=>null)]);
  if(!res)return; // timed out: the text checks still work
  c.artTags=ART_KEYS.filter((t,i)=>res[i]);c.artComplete=res.every(x=>x!==null);
  if(res.every(x=>x!==null)){artCache[key]=c.artTags;try{localStorage.setItem('mtgdle-art2',JSON.stringify(artCache))}catch(e){}}
@@ -1724,7 +1741,7 @@ async function sbDraw(){const intro=document.querySelector('.sbintro');if(intro)
   if(!rm){box.classList.add('fadeout');await wait(200)}
   render(c,{sandbox:true,roll});
   box.classList.remove('fadeout');
- }catch(e){box.classList.remove('fadeout');document.body.classList.remove('calm');box.textContent='Could not load card: '+e.message}
+ }catch(e){box.classList.remove('fadeout');document.body.classList.remove('calm');box.textContent='Could not load card: '+e.message+'. Scryfall may be busy, so wait a few seconds and try again.'}
  btn.disabled=false;
 }
 function impactFx(r){
@@ -1959,7 +1976,7 @@ document.getElementById('gen').onclick=async()=>{
  const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
  if(loadSt().days[today]!==undefined){ // already drawn today: go straight to the results
   app.innerHTML=`<p class="sub" style="text-align:center;padding:50px 0">Loading your card…</p>`;
-  try{const c=await dailyCard().then(async c=>{await preload(imgOf(c));return c});render(c)}catch(e){app.textContent='Could not load card: '+e.message}
+  try{const c=await dailyCard().then(async c=>{await preload(imgOf(c));return c});render(c)}catch(e){app.textContent='Could not load card: '+e.message+'. Scryfall may be busy, so wait a few seconds and try again.'}
   return;
  }
  if(!rm){document.body.classList.add('calm');setTimeout(()=>document.body.classList.remove('calm'),9000)} // pause the busy background while the cards animate
@@ -1969,6 +1986,6 @@ document.getElementById('gen').onclick=async()=>{
   if(!rm){app.classList.add('fadeout');await wait(200)}
   render(c);
   app.classList.remove('fadeout');
- }catch(e){app.classList.remove('fadeout');document.body.classList.remove('calm');app.textContent='Could not load card: '+e.message}
+ }catch(e){app.classList.remove('fadeout');document.body.classList.remove('calm');app.textContent='Could not load card: '+e.message+'. Scryfall may be busy, so wait a few seconds and try again.'}
 };
 </script></body></html>
