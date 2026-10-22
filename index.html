@@ -962,6 +962,57 @@ const ACH=[
  {n:'Narcissist',e:'🪞',d:'The card’s own name appears 2 or more times in its rules text',pts:20,t:c=>{const n=cName(c).toLowerCase();return n.length>=3&&tx(c).split(n).length-1>=2}},
  {n:'By the Numbers',e:'🔢',d:'Rules text contains 6 or more digits (+1/+1 counters, 2/2 tokens and the like)',pts:30,t:c=>(tx(c).match(/\d/g)||[]).length>=6},
 ];
+// ---- Batch 1 (generated): stat values, release years, set and promo types, artists, alphabet, Scrabble, keywords ----
+// Values that almost every card has (power, toughness, mana value, stat line, release year, first letter) are worth 0 points when common:
+// they still count for medals and set progress. Rarer values are worth more.
+function buildBatch1(){
+ const A=[],S=[];
+ const add=(set,e,list)=>{S.push({n:set,e,items:list.map(x=>x.n)});A.push(...list)};
+ const num=(c,k)=>{const v=ptv(c,k);return Number.isFinite(v)?v:NaN};
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ // power, toughness, mana value
+ const PP=[10,0,0,0,0,10,10,20,20,30,30,30,30,30],TP=[20,0,0,0,0,10,10,20,20,30,30,30,30,30],MP=[0,0,0,0,0,0,10,20,20,30,30,40,40,40,40,40,40];
+ add('Power Plant','💪',PP.map((p,n)=>({n:'Power '+(n===13?'13+':n),e:'💪',d:'A creature with power '+(n===13?'13 or more':n),pts:p,t:c=>{const v=num(c,'power');return n===13?v>=13:v===n}})));
+ add('Toughness Test','🛡️',TP.map((p,n)=>({n:'Toughness '+(n===13?'13+':n),e:'🛡️',d:'A creature with toughness '+(n===13?'13 or more':n),pts:p,t:c=>{const v=num(c,'toughness');return n===13?v>=13:v===n}})));
+ add('Mana Values','🔮',MP.map((p,n)=>({n:'Mana Value '+(n===16?'16+':n),e:'🔮',d:'A card with mana value '+(n===16?'16 or more':n),pts:p,t:c=>n===16?c.cmc>=16:c.cmc===n})));
+ const lines=[];for(let p=1;p<=7;p++)for(let q=1;q<=7;q++)lines.push({n:'Stat Line '+p+'/'+q,e:'⚔️',d:'A creature that is exactly '+p+'/'+q,pts:(p<=5&&q<=5)?0:10,t:c=>num(c,'power')===p&&num(c,'toughness')===q});
+ add('Stat Lines','⚔️',lines);
+ // release years of the printing
+ const yrs=[];for(let y=1993;y<=2026;y++)yrs.push({n:'Class of '+y,e:'📅',d:'This printing was released in '+y,pts:y===1993?30:y<=1996?20:y<=2009?10:0,t:c=>(c.released_at||'').slice(0,4)===String(y)});
+ add('Release Years','📅',yrs);
+ // set types
+ const ST=[['core','Core Set','📘',10,'A Core Set printing'],['expansion','Expansion','📕',0,'An expansion set printing'],['masters','Masters Set','🎓',10,'A Masters-style reprint set'],['commander','Commander Deck','🏰',10,'Printed in a Commander product'],['draft_innovation','Draft Innovation','🧪',20,'Printed in a draft experiment like Jumpstart or Conspiracy'],['duel_deck','Duel Deck','🤺',20,'Printed in a Duel Deck'],['from_the_vault','From the Vault','🔒',30,'Printed in a From the Vault box'],['premium_deck','Premium Deck','💎',30,'Printed in a Premium Deck Series'],['spellbook','Spellbook','📖',30,'Printed in a Spellbook'],['starter','Starter Deck','🎒',20,'Printed in a starter product'],['box','Box Set','📦',30,'Printed in a special box set'],['funny','Un-Set','🤡',20,'Printed in an Un-set or other joke set'],['masterpiece','Masterpiece','🖼️',40,'A Masterpiece Series printing'],['memorabilia','Memorabilia','🏆',30,'Printed in a memorabilia set'],['treasure_chest','Treasure Chest','🪙',30,'Printed in a Treasure Chest'],['planechase','Planechase','🌌',20,'Printed in a Planechase set'],['archenemy','Archenemy','😈',30,'Printed in an Archenemy set'],['arsenal','Arsenal','🛠️',30,'Printed in an Arsenal set'],['alchemy','Alchemy','⚗️',20,'An Alchemy digital printing'],['vanguard','Vanguard Series','🎴',30,'A Vanguard card']];
+ add('Set Types','📚',ST.map(([k,n,e,p,d])=>({n,e,d,pts:p,t:c=>c.set_type===k})));
+ // promo types and special flags
+ const PR=[['prerelease','Prerelease Promo','🎉',20],['buyabox','Buy-a-Box','🎁',20],['bundle','Bundle Promo','🧺',20],['fnm','Friday Night Magic','🌙',20],['judgegift','Judge Gift','⚖️',40],['gameday','Game Day','🎮',30],['draftweekend','Draft Weekend','🏁',30],['release','Release Event','🎊',30],['setpromo','Set Promo','🔖',20],['datestamped','Date Stamped','📆',30],['tourney','Tournament Prize','🏅',40],['convention','Convention Exclusive','🎪',30],['arenaleague','Arena League','🏟️',30],['openhouse','Open House','🏠',30],['serialized','Serialized','🔢',60],['surgefoil','Surge Foil','⚡',30],['galaxyfoil','Galaxy Foil','🌠',30],['confettifoil','Confetti Foil','🎆',30],['ripplefoil','Ripple Foil','🌊',30],['textured','Textured Foil','🧱',30],['promopack','Promo Pack','🎫',20],['boosterfun','Booster Fun','✨',10],['glossy','Glossy','💧',20],['intropack','Intro Pack','📗',20],['planeswalkerdeck','Planeswalker Deck','🌀',20]];
+ const prl=PR.map(([k,n,e,p])=>({n,e,d:'Printed as a '+n+' promo ('+k+')',pts:p,t:c=>(c.promo_types||[]).includes(k)}));
+ prl.push({n:'Story Spotlight',e:'📰',d:'A card featured in the Magic story',pts:30,t:c=>!!c.story_spotlight});
+ prl.push({n:'Game Changer',e:'🚨',d:'On the Commander Game Changers list',pts:20,t:c=>!!c.game_changer});
+ add('Promo Types','🎟️',prl);
+ // artists
+ const AR=[['Rebecca Guay',20],['Seb McKinnon',20],['Terese Nielsen',20],['Rob Alexander',10],['Christopher Rush',30],['Mark Tedin',20],['Douglas Shuler',30],['Dan Frazier',30],['Quinton Hoover',30],['Amy Weber',30],['Anson Maddocks',30],['Liz Danforth',30],['Kaja Foglio',30],['Phil Foglio',30],['Ron Spencer',20],['Pete Venters',20],['John Avon',20],['Mark Poole',30],['Carl Critchlow',20],['Greg Staples',10],['Kev Walker',20],['Todd Lockwood',20],['Mark Zug',20],['Zoltan Boros',20],['Tyler Jacobson',20],['Chris Rahn',20],['Magali Villeneuve',20],['Daarken',20],['Raymond Swanland',20],['Eric Deschamps',20],['Johannes Voss',20],['Jason Chan',20],['Steve Argyle',20],['Volkan Baga',20],['Svetlin Velinov',20],['Chase Stone',20],['Wayne Reynolds',20],['Adam Paquette',20],['James Paick',20],['Min Yum',20],['Brom',30],['Ron Spears',20],['Justin Sweet',20],['Matt Cavotta',20],['Howard Lyon',20],['Jesper Myrfors',30],['Randy Gallegos',20]];
+ const artistsOf=c=>[c.artist,...(c.card_faces||[]).map(f=>f.artist)].filter(Boolean).flatMap(a=>a.split(/\s*&\s*/)).map(norm);
+ add('Artist Alley','🎨',AR.map(([n,p])=>({n,e:'🎨',d:'Illustrated by '+n,pts:p,t:c=>artistsOf(c).includes(norm(n))})));
+ // alphabet and Scrabble
+ const first=c=>{const m=cName(c).match(/[A-Za-z]/);return m?m[0].toUpperCase():''};
+ const LP={A:0,B:0,C:0,D:0,E:10,F:0,G:0,H:0,I:10,J:20,K:10,L:0,M:0,N:10,O:10,P:0,Q:20,R:0,S:0,T:0,U:20,V:10,W:0,X:20,Y:10,Z:20};
+ const al=Object.keys(LP).map(L=>({n:'Letter '+L,e:'🔤',d:'The card name starts with '+L,pts:LP[L],t:c=>first(c)===L}));
+ const SV={A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
+ const scr=c=>cName(c).toUpperCase().split('').reduce((t,ch)=>t+(SV[ch]||0),0);
+ al.push({n:'Word Nerd',e:'🧮',d:'The card name is worth 30 or more in Scrabble tiles',pts:10,g:'scrabble',t:c=>scr(c)>=30});
+ al.push({n:'Triple Word Score',e:'🧮',d:'The card name is worth 40 or more in Scrabble tiles',pts:20,g:'scrabble',t:c=>scr(c)>=40});
+ al.push({n:'Bingo',e:'🧮',d:'The card name is worth 50 or more in Scrabble tiles',pts:40,g:'scrabble',t:c=>scr(c)>=50});
+ add('Alphabet Soup','🔤',al);
+ // keywords: the card's own keyword list, plus rules text for keyword actions
+ const kw=(k,txt)=>c=>kwHas(c,k)||(txt&&new RegExp('\\b'+(txt===true?k:txt)+'\\b').test(tx(c)));
+ const CK=[['Watchful','👁️','Vigilance',10,'vigilance'],['First Blood','🩸','First strike',10,'first strike'],['Double Down','⚔️','Double strike',30,'double strike'],['Menacing','😠','Menace',20,'menace'],['Long Reach','🕸️','Reach',10,'reach'],['Stonewall','🧱','Defender',20,'defender'],['Protected','🛑','Protection',20,'protection'],['Warded','🔰','Ward',20,'ward'],['Mentored','🧑‍🏫','Mentor',30,'mentor'],['Afterlife','👻','Afterlife',30,'afterlife']];
+ const SK=[['Second Wind','🌬️','Flashback',20,'flashback'],['Kicked Up','🦵','Kicker',20,'kicker'],['Cycle Time','🔄','Cycling',20,'cycling'],['Prowess','🥋','Prowess',20,'prowess'],['Madness','🤪','Madness',30,'madness'],['Rebound','🏀','Rebound',40,'rebound'],['Overload','🔌','Overload',40,'overload'],['Split Second','⏱️','Split second',40,'split second'],['Replicate','🧬','Replicate',40,'replicate'],['Evoke','🔔','Evoke',20,'evoke'],['Affinity','🤝','Affinity',30,'affinity'],['Armed Up','🗡️','Equip',10,'equip']];
+ const GK=[['Undying','🧟','Undying',30,'undying'],['Persist','💫','Persist',30,'persist'],['Unearthed','⛏️','Unearth',30,'unearth'],['Great Escape','🏃','Escape',30,'escape'],['Proliferator','➕','Proliferate',30,'proliferate',true],['Army Builder','🪖','Amass',30,'amass',true],['Seer','🔮','Scry',10,'scry',true],['Surveyor','🔭','Surveil',20,'surveil',true],['Explorer','🧭','Explore',20,'explore',true],['Fabricator','🤖','Fabricate',40,'fabricate'],['Landfall','🌄','Landfall',20,'landfall',true]];
+ const kl=L=>L.map(([n,e,w,p,k,txt])=>({n,e,d:'Has '+w.toLowerCase()+(txt?' (as a keyword or in its rules text)':' as a keyword'),pts:p,t:kw(k,txt)}));
+ add('Combat Keywords','⚔️',kl(CK));add('Spell Keywords','📜',kl(SK));add('Graveyard & Growth','🌱',kl(GK));
+ return{ach:A,sets:S};
+}
+const BATCH1=buildBatch1();ACH.push(...BATCH1.ach);
 // ---- Daily pick: same card for everyone, based on UTC date ----
 const today=new Date().toISOString().slice(0,10);
 function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
@@ -1161,6 +1212,7 @@ const SETS=[
  {n:'The Multiverse',e:'🪐',items:['Ravnica Local','Zendikar Local','Innistrad Local','Kamigawa Local','Theros Local','Tarkir Local','Ixalan Local','Eldraine Local','Dominaria Local','Mirrodin Local','Kaladesh Local','Amonkhet Local','Alara Local','Lorwyn Local']},
  {n:'Legendary Specials',e:'👑',items:['Colorless Legend','Mythic Gold Legend','One-Drop Legend','Giant Legend','Legendary Land','Legendary Machine','Gold Walker','Legendary Spell']},
 ];
+BATCH1.sets.forEach(x=>SETS.push(x));
 const FOIL_MAX=60; // best foil result (Etched Foil)
 // Achievements with the same g:'id' form a ladder: a card only earns the highest one it qualifies for.
 // EXCL lists groups of exclusive paths: a card can only follow ONE option in each group ('g:id' means that ladder's top rung).
@@ -1253,7 +1305,7 @@ function achBox(a,o){
  o=o||{};const t=TIERS[tierOf(a)],cnt=o.count||0,nx=cnt?nextMedal(cnt):null,md=cnt?medalOf(cnt):null;
  const tiles=MEDALS.map(m=>`<span class="mt${cnt>=m.n?' got mt-'+m.c:''}${nx&&nx.n===m.n?' next':''}" title="${m.name} at ${m.n}">${m.n}</span>`).join('');
  const badges=(o.nw?'<span class="newb">NEW</span>':'')+(o.up&&md?`<span class="newb up">⬆ ${md.name}</span>`:'');
- return `<div class="ab"><div class="abh"><span class="abi${o.pop?' ic':''}">${o.locked?'🔒':(a.e||'🏆')}</span><span class="abn" title="${esc(a.n)}">${esc(a.n)}</span><span class="abp">${o.locked?'':'+'}${a.pts.toLocaleString()}</span></div><div class="abb"><span class="rt">${t[0]}</span>${pctChip(a)}${badges}</div><div class="abd">${esc(a.d)}</div>${cnt?`<div class="abf"><div class="mts">${tiles}</div><div class="abc"><span class="cn">×${cnt}</span> ${nx?`· Next: ${nx.name} at ${nx.n}`:'· Top medal reached'}</div></div>`:''}${o.first?`<div class="abx">First earned with ${esc(o.first)}</div>`:''}</div>`;
+ return `<div class="ab"><div class="abh"><span class="abi${o.pop?' ic':''}">${o.locked?'🔒':(a.e||'🏆')}</span><span class="abn" title="${esc(a.n)}">${esc(a.n)}</span><span class="abp">${a.pts?(o.locked?'':'+')+a.pts.toLocaleString():'★'}</span></div><div class="abb"><span class="rt">${t[0]}</span>${pctChip(a)}${badges}</div><div class="abd">${esc(a.d)}</div>${cnt?`<div class="abf"><div class="mts">${tiles}</div><div class="abc"><span class="cn">×${cnt}</span> ${nx?`· Next: ${nx.name} at ${nx.n}`:'· Top medal reached'}</div></div>`:''}${o.first?`<div class="abx">First earned with ${esc(o.first)}</div>`:''}</div>`;
 }
 function showTab(t){const NM={T:'Home',C:'Collection',A:'Achievements',L:'Leaderboard',S:'Sandbox',U:'User'};const m={T:['app','tabT'],C:['coll','tabC'],A:['ach','tabA'],S:['sbp','tabS'],U:['usr','tabU'],L:['lb','tabL']};for(const k in m){const e=document.getElementById(m[k][0]),b=document.getElementById(m[k][1]);if(e)e.hidden=k!==t;if(b)b.classList.toggle('on',k===t)}if(t==='C')renderColl();if(t==='A')renderAch();if(t==='U')renderUser();if(t==='L'&&typeof renderLb==='function')renderLb();const ab=m[t]&&document.getElementById(m[t][1]);if(ab&&ab.scrollIntoView)ab.scrollIntoView({inline:'center',block:'nearest'})}
 const FOILS=[{n:'Foil',e:'✨',d:'Foil roll (15% chance)',pts:30},{n:'Etched Foil',e:'💎',d:'Etched foil roll (3% chance)',pts:60}];
@@ -1270,7 +1322,8 @@ function renderAch(){
  const done=all.filter(a=>got[a.n]).length;
  // Closest to a new medal: earned achievements with the fewest repeats left before their next medal tier
  const MC={bronze:'#d9955a',silver:'#cfd6e2',gold:'#f0c04a',plat:'#7fe0ff',diamond:'#c4a8ff'};
- const nu=all.filter(a=>got[a.n]&&nextMedal(got[a.n].n)).map(a=>{const c=got[a.n].n,nx=nextMedal(c),pv=medalOf(c);return{a,c,nx,left:nx.n-c,p:Math.max(4,Math.round((c-pv.n)/(nx.n-pv.n)*100))}}).sort((x,y)=>x.left-y.left||y.nx.n-x.nx.n||y.a.pts-x.a.pts).slice(0,3);
+ const setOf={};SETS.forEach(s=>s.items.forEach(n=>setOf[n]=s.n));const seen=new Set(); // one row per set, so a busy set cannot fill the box
+ const nu=all.filter(a=>got[a.n]&&nextMedal(got[a.n].n)).map(a=>{const c=got[a.n].n,nx=nextMedal(c),pv=medalOf(c);return{a,c,nx,left:nx.n-c,p:Math.max(4,Math.round((c-pv.n)/(nx.n-pv.n)*100))}}).sort((x,y)=>x.left-y.left||y.nx.n-x.nx.n||y.a.pts-x.a.pts).filter(u=>{const k=setOf[u.a.n]||u.a.n;if(seen.has(k))return false;seen.add(k);return true}).slice(0,3);
  const nextUp=nu.length?`<div class="setc nu" style="margin-bottom:12px"><h3>Closest to a new medal</h3>${nu.map(u=>`<div class="nurow" style="--mc:${MC[u.nx.c]}" title="×${u.c} · ${u.nx.name} at ${u.nx.n}"><span class="nui">${u.a.e||'🏆'}</span><div class="num"><div class="nun"><b>${esc(u.a.n)}</b><span class="nuc">×${u.c}</span><span class="nur">${u.left} more → ${u.nx.e}</span></div><div class="pbar"><b data-w="${u.p}" style="width:${u.p}%"></b></div></div></div>`).join('')}</div>`:'';
  const setHtml=sets.map(s=>{const its=s.items.map(n=>byN[n]).filter(Boolean),d=its.filter(a=>got[a.n]).length,full=its.length>0&&d===its.length,p=its.length?pct(d/its.length):0,open=openSets.has(s.n);
   return `<div class="setc${full?' done':''}"><h3 class="sh${open?' open':''}" data-s="${esc(s.n)}"><span>${s.e} ${esc(s.n)}${full?' ✅':''}</span><span class="sc">${d} / ${its.length} <i class="chev">▸</i></span></h3><ul${open?'':' hidden'}>${its.map(row).join('')}</ul>${bar(p)}<div class="plab"><span>${p}%</span><span>${full?'Complete!':''}</span></div></div>`}).join('');
