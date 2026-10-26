@@ -1445,7 +1445,7 @@ const SET_BEST=SETS.map(s=>({n:s.n,best:calcMax(new Set(s.items))}));
 const SCORE_MIN=0,SCORE_MAX=SET_BEST.map(x=>x.best).sort((a,b)=>b-a).slice(0,MAX_SETS).reduce((a,b)=>a+b,0);
 // Tier cut-offs: the highest score in each tier (Legendary is everything above the last cut-off).
 // Tuned on simulated test batches so that about 35% of draws are Common, 32% Uncommon, 17% Rare, 11% Epic, 3% Mythic and 2% Legendary.
-const TIER_CUTS=[160,210,260,330,440];
+const TIER_CUTS=[275,340,405,505,710];
 const STIERS=[['Common','#a9a9a9'],['Uncommon','#9fc6d9'],['Rare','#6ea8ff'],['Epic','#b57cff'],['Mythic','#ff7a45'],['Legendary','#ff5fa2']];
 const stBounds=STIERS.map((t,i)=>({lo:i?TIER_CUTS[i-1]+1:0,hi:i<5?TIER_CUTS[i]:Math.round(TIER_CUTS[4]*1.5)}));
 // Live rarity percentage: how many draws score at least this high. Anchored to the tier cut-offs,
