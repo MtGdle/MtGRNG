@@ -508,6 +508,30 @@ header b .rng{background:linear-gradient(180deg,#ffe38e,#e8a93a);-webkit-backgro
 .instbtn{margin-top:8px}
 html{overscroll-behavior-y:none}
 @media (display-mode:standalone){body{padding-bottom:env(safe-area-inset-bottom,0px)}}
+
+/* ---- Player profiles ---- */
+.pname{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+.pname:hover,.pname:focus-visible{color:#fff;text-decoration-style:solid;outline:none}
+.pfov{position:fixed;inset:0;z-index:60;background:rgba(8,6,14,.86);display:flex;align-items:center;justify-content:center;padding:14px;animation:fadein .2s ease both}
+#cardmodal.modal{z-index:70}
+.pfbox{position:relative;width:100%;max-width:440px;max-height:calc(100vh - 28px);overflow-y:auto;padding:20px 18px 18px;border-radius:16px;background:var(--glass),#1c1828;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.6);text-align:left}
+.pfh h2{margin:0 36px 2px 0;font-size:1.35rem}
+.pfh .rk{font-family:var(--ui);font-size:.8rem;color:var(--mut);margin-bottom:6px}
+.pfgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.pfc{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center}
+.pfc b{display:block;font-family:var(--ui);font-weight:800;font-size:1.15rem;color:var(--ac);font-variant-numeric:tabular-nums}
+.pfc span{font-family:var(--ui);font-size:.68rem;color:var(--mut);letter-spacing:.04em}
+.pft{font-family:var(--ui);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:14px 0 6px}
+.pfbests{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pfbest{cursor:pointer;text-align:center}
+.pfbest .cardbox{display:block;border-radius:6px}
+.pfbest .cardbox img,.pfbest .cardbox .ph{width:100%;border-radius:6px;box-shadow:0 0 0 2px var(--fr)}
+.pfbest .cardbox .ph{height:auto;aspect-ratio:5/7;font-size:.7rem;animation:none;padding:4px}
+.pfcn{font-family:var(--ui);font-size:.72rem;font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pfcs{font-family:var(--ui);font-size:.74rem;font-weight:800;color:var(--ac)}
+.pfr{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line);font-family:var(--ui);font-size:.8rem;cursor:pointer}
+.pfr:first-of-type{border-top:0}
+.pfr .d{color:var(--mut);flex:none;width:4.6em;white-space:nowrap}.pfr .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pfr .s{font-weight:800;color:var(--ac);flex:none}
 </style></head><body>
 <header><div class="hl"><b><span class="mtg">MtG</span><span class="rng">RNG</span></b><span class="hsub"><span>Daily card score</span><span class="dot">·</span><span class="sub" id="date"></span></span></div><button id="snd" class="tab" style="padding:2px 8px;margin:0" title="Sound on/off">🔊</button></header>
 <nav class="tabbar" id="tabbar"><button class="tab on" id="tabT"><i>🃏</i><span class="tl">Home</span><span class="tsh">Home</span></button><button class="tab" id="tabC"><i>🗂️</i><span class="tl">Collection</span><span class="tsh">Cards</span></button><button class="tab" id="tabA"><i>🏆</i><span class="tl">Achievements</span><span class="tsh">Awards</span></button><button class="tab" id="tabL" hidden><i>📊</i><span class="tl">Leaderboard</span><span class="tsh">Board</span></button><button class="tab" id="tabS"><i>🧪</i><span class="tl">Sandbox</span><span class="tsh">Lab</span></button><button class="tab" id="tabU"><i>👤</i><span class="tl">User</span><span class="tsh">You</span></button></nav>
@@ -1517,6 +1541,7 @@ async function renderUser(){
  el.innerHTML=`<div class="setc" style="text-align:center"><div class="sub" id="uname">Player</div><div class="sub" style="font-size:.8rem;letter-spacing:.12em;margin-top:6px">TOTAL SCORE</div><div class="score" id="utot">${total.toLocaleString()}</div>${n?'':'<p class="sub">Draw your first card to start your score.</p>'}<div class="sub" id="urank"></div></div><div class="ugrid">${tile('Days played',n)}${tile('Best day',bestDay.toLocaleString(),n?stTag(bestDay):'')}${tile('Average day',(n?Math.round(total/n):0).toLocaleString())}${tile('Current streak',calcStreak(st.days))}${tile('Longest streak',longestStreak(st.days))}${tile('Cards collected',cards.length)}${tile('Foil cards',foils)}${tile('Achievements',got.size+' / '+allN)}</div>${bestEntry?`<div class="setc" style="margin-top:14px"><div class="sub">Best card</div><h3 style="margin:2px 0">${esc(bestEntry[1].name)}</h3><div class="sub">${bestEntry[0]} · ${bestEntry[1].score.toLocaleString()} pts ${stTag(bestEntry[1].score)}</div></div>`:''}`;
  renderDrawStyle(el);
  renderInstallBox(el);
+ renderProfileLink(el);
  if(SB_ON())renderBadgePicker(el);
  if(SB_ON()){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
   b.innerHTML=`<h3>Public leaderboard</h3><div class="sub">Pick a display name to share your daily scores. Everyone can see this name.</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="pname" maxlength="20" placeholder="Display name" value="${esc(sbName())}" style="flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit"><button class="tab" id="psave">Save name</button></div><div class="sub" id="pmsg" style="margin-top:6px"></div>`;
@@ -1709,7 +1734,7 @@ function openLbCard(r){
  const cols=(r.colors&&r.colors.length?r.colors:['C']).map(x=>`<span class="pip m-${x}">${x}</span>`).join('');
  closeCard();
  const m=document.createElement('div');m.id='cardmodal';m.className='modal';
- m.innerHTML=`<div class="mbox" style="--fr:${frameColor(r.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${foilCls(r.foil)}">${r.img?`<img class="mimg" src="${esc(r.img)}" alt="${esc(r.card)}">`:`<div class="ph mimg">${esc(r.card)}</div>`}</div></div><div><div class="sub">Drawn ${esc(r.day||'')} by ${esc(nm)}${bdgHtml(r.badges)}${r.foil?` · ${r.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(r.card)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="score" style="font-size:2.6rem;margin-top:8px">${r.score.toLocaleString()}</div><div class="sub">points ${stTag(r.score)} · Top ${fmtPct(topPct(r.score))} of draws${its.length?` · ${its.length} achievement${its.length===1?'':'s'}`:''}</div>${rows}</div></div>`;
+ m.innerHTML=`<div class="mbox" style="--fr:${frameColor(r.colors)}"><button class="mclose" aria-label="Close">✕</button><div><div class="cardbox${foilCls(r.foil)}">${r.img?`<img class="mimg" src="${esc(r.img)}" alt="${esc(r.card)}">`:`<div class="ph mimg">${esc(r.card)}</div>`}</div></div><div><div class="sub">Drawn ${esc(r.day||'')} by ${r.name?`<span class="pname" data-pname="${esc(nm)}" role="button" tabindex="0">${esc(nm)}</span>`:esc(nm)}${bdgHtml(r.badges)}${r.foil?` · ${r.foil} foil`:''}</div><h2 style="margin:4px 0">${esc(r.card)}</h2><div style="margin:2px 0 6px">${cols}</div><div class="score" style="font-size:2.6rem;margin-top:8px">${r.score.toLocaleString()}</div><div class="sub">points ${stTag(r.score)} · Top ${fmtPct(topPct(r.score))} of draws${its.length?` · ${its.length} achievement${its.length===1?'':'s'}`:''}</div>${rows}</div></div>`;
  m.onclick=e=>{if(e.target===m)closeCard()};
  m.querySelector('.mclose').onclick=closeCard;
  document.body.appendChild(m);document.body.style.overflow='hidden';tiltify(m.querySelector('.cardbox'));
@@ -1717,7 +1742,68 @@ function openLbCard(r){
 
 // One featured card (used at the top of the leaderboard and on the Home page)
 const featHtml=(f,label,me,showDay)=>{const fn=f.name||'Someone';
- return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by <b>${esc(fn)}</b>${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(fmtDay(f.day)):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
+ return `<div class="lbfeat" data-i="0" role="button" tabindex="0" style="--fr:${frameColor(f.colors)}"><div class="lbfl">👑 ${label}</div><div class="lbfm"><div class="cardbox${foilCls(f.foil)}">${f.img?`<img src="${esc(f.img)}" alt="${esc(f.card)}">`:`<div class="ph">${esc(f.card)}</div>`}</div><div class="lbfi"><h3>${f.foil?f.foil+' ':''}${esc(f.card)}</h3><div class="lbfs"><span class="lbsc">${f.score.toLocaleString()}</span><span class="sub">points</span>${stTag(f.score)}</div><div class="sub" style="font-size:.85rem">Top ${fmtPct(topPct(f.score))} of draws</div>${lbBubs(f.ach,7)}<div class="sub">drawn by ${f.name?`<b class="pname" data-pname="${esc(fn)}" role="button" tabindex="0">${esc(fn)}</b>`:`<b>${esc(fn)}</b>`}${fn===me?' (you)':''}${bdgHtml(f.badges)}${showDay&&f.day?' · '+esc(fmtDay(f.day)):''}</div><div class="sub" style="font-size:.75rem;margin-top:4px">Tap for all achievements</div></div></div></div>`};
+// ---------- Player profiles: tap a name anywhere to see their best draws, streaks and rarest achievements ----------
+async function profileData(name){
+ const q='daily_scores?players.name=eq.'+encodeURIComponent(name)+'&order=day.desc&limit=400',cols='score,card,tier,foil,colors,img,day';
+ let rows=null;
+ for(const [pl,ach] of [['players!inner(name,badges)',true],['players!inner(name)',true],['players!inner(name)',false]]){
+  try{rows=await sbRest(q+'&select='+cols+','+pl+(ach?',ach':''),{auth:false});break}catch(e){}
+ }
+ return(rows||[]).map(r=>({...r,name:(r.players&&r.players.name)||name,badges:(r.players&&r.players.badges)||[],ach:r.ach||[]}));
+}
+async function profileRanks(){try{return(await lbData('all',100))||[]}catch(e){return[]}}
+function profStats(rows){
+ const days=[...new Set(rows.map(r=>r.day))].sort(),dset=new Set(days),T=d=>new Date(d+'T00:00:00Z').getTime(),D=t=>new Date(t).toISOString().slice(0,10);
+ const total=rows.reduce((t,r)=>t+r.score,0);
+ let longest=0,run=0,prev=null;
+ days.forEach(d=>{const t=T(d);run=(prev!==null&&t-prev===86400000)?run+1:1;prev=t;if(run>longest)longest=run});
+ let cur=0,t=T(today);if(!dset.has(today))t-=86400000;
+ while(dset.has(D(t))){cur++;t-=86400000}
+ const ach={};rows.forEach(r=>(r.ach||[]).forEach(n=>ach[n]=(ach[n]||0)+1));
+ return{n:days.length,total,avg:days.length?Math.round(total/days.length):0,best:rows.slice().sort((a,b)=>b.score-a.score),longest,cur,ach};
+}
+const fmtShort=d=>{try{return new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'})}catch(e){return d}};
+function closeProfile(){const m=document.getElementById('profmodal');if(m)m.remove();if(!document.getElementById('cardmodal')&&!document.getElementById('welcome'))document.body.style.overflow=''}
+function renderProfile(body,name,rows,ranks){
+ const mine=sbName()===name,head=(sub)=>`<div class="pfh"><h2>${esc(name)}${mine?' (you)':''}${bdgHtml((rows[0]&&rows[0].badges)||[],'lg')}</h2>${sub?`<div class="rk">${sub}</div>`:''}</div>`;
+ if(!rows.length){body.innerHTML=head('')+'<p class="sub">No draws saved yet.</p>';return}
+ const st=profStats(rows),idx=ranks.findIndex(r=>r.name===name),cell=(v,l)=>`<div class="pfc"><b>${v}</b><span>${l}</span></div>`;
+ const bestRows=st.best.slice(0,3),rare=achList(Object.keys(st.ach)).filter(a=>!isFoilAch(a)).slice(0,10),recent=rows.slice(0,7);
+ body.innerHTML=head(idx>=0?'All-time rank #'+(idx+1)+' of the top players':'')+
+  `<div class="pfgrid">${cell(st.total.toLocaleString(),'TOTAL POINTS')}${cell(st.n,'DAYS PLAYED')}${cell(st.avg.toLocaleString(),'AVERAGE DAY')}${cell(st.best[0].score.toLocaleString(),'BEST DRAW')}${cell(st.cur,'CURRENT STREAK')}${cell(st.longest,'LONGEST STREAK')}</div>`+
+  `<div class="pft">Best draws</div><div class="pfbests">${bestRows.map((r,i)=>`<div class="pfbest" data-pi="${i}" role="button" tabindex="0" style="--fr:${frameColor(r.colors)}"><div class="cardbox${foilCls(r.foil)}">${r.img?`<img src="${esc(r.img)}" alt="${esc(r.card)}" loading="lazy">`:`<div class="ph">${esc(r.card)}</div>`}</div><div class="pfcn">${r.foil?r.foil+' ':''}${esc(r.card)}</div><div class="pfcs">${r.score.toLocaleString()} pts</div></div>`).join('')}</div>`+
+  (rare.length?`<div class="pft">Rarest achievements</div><div class="bubs" style="justify-content:flex-start;margin:0">${rare.map(a=>`<span class="bub" style="--tc:${TIERS[tierOf(a)][1]}" title="${esc(a.n)}"><i>${a.e||'🏆'}</i>${esc(a.n)}${st.ach[a.n]>1?' ×'+st.ach[a.n]:''}</span>`).join('')}</div>`:'')+
+  `<div class="pft">Recent draws</div>${recent.map((r,i)=>`<div class="pfr" data-pr="${i}" role="button" tabindex="0"><span class="d">${esc(fmtShort(r.day))}</span><span class="n">${r.foil?r.foil+' ':''}${esc(r.card)}</span><span class="s">${r.score.toLocaleString()}</span></div>`).join('')}`;
+ body.querySelectorAll('[data-pi]').forEach(n=>{const go=()=>openLbCard({...bestRows[+n.dataset.pi],name});n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+ body.querySelectorAll('[data-pr]').forEach(n=>{const go=()=>openLbCard({...recent[+n.dataset.pr],name});n.onclick=go;n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+}
+async function openProfile(name){
+ if(!name||!SB_ON())return;
+ closeProfile();
+ const m=document.createElement('div');m.id='profmodal';m.className='pfov';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.setAttribute('aria-label','Player profile');
+ m.innerHTML=`<div class="pfbox"><button class="mclose" aria-label="Close">✕</button><div id="pfbody"><div class="pfh"><h2>${esc(name)}</h2></div><div class="sk" style="height:80px;margin:12px 0"></div><div class="sk" style="height:150px"></div></div></div>`;
+ m.onclick=e=>{if(e.target===m)closeProfile()};m.querySelector('.mclose').onclick=closeProfile;
+ document.body.appendChild(m);document.body.style.overflow='hidden';
+ try{
+  const [rows,ranks]=await Promise.all([profileData(name),profileRanks()]);
+  const b=document.getElementById('pfbody');if(!b||!document.getElementById('profmodal'))return;
+  renderProfile(b,name,rows,ranks);
+ }catch(e){const b=document.getElementById('pfbody');if(b)b.innerHTML=`<div class="pfh"><h2>${esc(name)}</h2></div><p class="sub">Could not load this profile. Try again in a moment.</p>`}
+}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-pname]');if(!t)return;e.preventDefault();e.stopPropagation();openProfile(t.dataset.pname)},true);
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){closeProfile();return}
+ if(e.key!=='Enter'&&e.key!==' ')return;
+ const a=document.activeElement,t=a&&a.closest&&a.closest('[data-pname]');if(!t)return;
+ e.preventDefault();e.stopPropagation();openProfile(t.dataset.pname);
+},true);
+function renderProfileLink(el){
+ if(!SB_ON()||!sbName())return;
+ const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
+ b.innerHTML='<h3>Public profile</h3><div class="sub">See what other players see when they tap your name.</div><div style="margin-top:10px"><button class="tab on" id="myprof">View my profile</button></div>';
+ el.appendChild(b);b.querySelector('#myprof').onclick=()=>openProfile(sbName());
+}
 const lbWire=(el,rows)=>{el.querySelectorAll('.lbfeat .cardbox').forEach(tiltify);return lbWire0(el,rows)};
 const lbWire0=(el,rows)=>el.querySelectorAll('[data-i]').forEach(n=>{n.onclick=()=>openLbCard(rows[+n.dataset.i]);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLbCard(rows[+n.dataset.i])}}});
 const fmtDay=d=>{try{return new Date(d+'T00:00:00Z').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'})}catch(e){return d}};
@@ -1731,10 +1817,10 @@ async function renderLb(){
   const tg=`<div class="lbtabs">${LB_MODES.map(([k,l])=>`<button class="tab ${lbMode===k?'on':''}" data-m="${k}">${l}</button>`).join('')}</div>`;
   let body;
   if(!rows.length)body=msg('No scores yet. Draw a card to get on the board.');
-  else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr static${r.name===me?' me':''}"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}${bdgHtml(r.badges)}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
+  else if(lbMode==='all')body=`<div class="lbl">${rows.map((r,i)=>`<div class="lbr${r.name===me?' me':''}" data-pname="${esc(r.name)}" role="button" tabindex="0"><span class="lbn">${i+1}</span><span class="lbm"><b>${esc(r.name)}${r.name===me?' (you)':''}${bdgHtml(r.badges)}</b><span class="sub">best ${r.best.toLocaleString()} · ${r.days} day${r.days===1?'':'s'}</span></span><span class="lbs">${r.total.toLocaleString()} pts</span></div>`).join('')}</div>`;
   else{
    body=(lbMode==='fame'?'<div class="sub" style="text-align:center;margin:0 0 10px">The highest-scoring draws ever recorded.</div>':'')+featHtml(rows[0],lbMode==='fame'?'BEST DRAW OF ALL TIME':lbMode==='week'?'BEST DRAW THIS WEEK':"TODAY'S BEST DRAW",me,lbMode==='week'||lbMode==='fame')+
-    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${lbMode==='fame'&&i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${(lbMode==='week'||lbMode==='fame')&&r.day?' · '+esc(fmtDay(r.day)):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
+    `<div class="lbl">${rows.map((r,i)=>{const n=r.name||'Someone',t=STIERS[stOf(r.score)];return `<div class="lbr${n===me?' me':''}" data-i="${i}" role="button" tabindex="0" style="--tc:${t[1]}"><span class="lbn">${lbMode==='fame'&&i<3?['🥇','🥈','🥉'][i]:i+1}</span><span class="lbt">${r.img?`<img src="${esc(r.img)}" alt="" loading="lazy">`:'🃏'}</span><span class="lbm"><b>${r.foil?r.foil+' ':''}${esc(r.card)}</b><span class="sub">${r.name?`<span class="pname" data-pname="${esc(n)}" role="button" tabindex="0">${esc(n)}</span>`:esc(n)}${n===me?' (you)':''}${bdgHtml(r.badges)}${(lbMode==='week'||lbMode==='fame')&&r.day?' · '+esc(fmtDay(r.day)):''} · ${stTag(r.score)}</span></span><span class="lbs">${r.score.toLocaleString()} pts</span></div>`}).join('')}</div>`;
   }
   const more=rows.length>=lbLimit&&lbLimit<100?'<button class="tab lbmore" id="lbmore">Show more</button>':'';
   el.innerHTML=tg+body+more;
