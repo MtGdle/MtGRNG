@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="A daily random Magic: The Gathering card. Draw it, earn achievements, and climb the leaderboard.">
 <meta property="og:title" content="MtGRNG – Daily Card Score">
 <meta property="og:description" content="Draw today's random Magic card, earn achievements and see how rare your pull is.">
@@ -13,6 +13,13 @@
 <meta name="twitter:image" content="https://mtgdle.github.io/MtGRNG/og-image.png">
 <link rel="canonical" href="https://mtgdle.github.io/MtGRNG/">
 <meta name="theme-color" content="#14121a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MtGRNG">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="icon" type="image/png" href="favicon-48.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%83%8F%3C/text%3E%3C/svg%3E">
 <title>MtGRNG – Daily Card Score</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@500;600;700&display=swap">
@@ -489,6 +496,18 @@ header b .rng{background:linear-gradient(180deg,#ffe38e,#e8a93a);-webkit-backgro
 .chcard:focus-visible{outline:2px solid var(--ac);outline-offset:4px}
 @media (prefers-reduced-motion:reduce){.chcard,.chcard.charged{animation:none}}
 .dsrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
+/* ---- Add to Home Screen ---- */
+.setc.instbar{display:flex;flex-direction:row;align-items:flex-start;gap:12px;max-width:460px;margin:22px auto 0;padding:12px 30px 12px 14px;text-align:left;position:relative}
+.instbar .iico{font-size:1.8rem;flex:none}
+.instbar .itx{flex:1;min-width:0;font-family:var(--ui);font-size:.86rem;line-height:1.4}
+.instbar .itx b{display:block;font-size:.95rem;color:#fff;margin-bottom:2px}
+.instbar .ix{position:absolute;top:2px;right:6px;background:none!important;border:0!important;box-shadow:none!important;color:var(--mut);font-size:1rem;padding:6px;cursor:pointer;min-width:0}
+.k{font-weight:800;color:#fff}
+.istep{margin-top:4px;font-family:var(--ui);font-size:.84rem;line-height:1.5}
+.instbtn{margin-top:8px}
+html{overscroll-behavior-y:none}
+@media (display-mode:standalone){body{padding-bottom:env(safe-area-inset-bottom,0px)}}
 </style></head><body>
 <header><div class="hl"><b><span class="mtg">MtG</span><span class="rng">RNG</span></b><span class="hsub"><span>Daily card score</span><span class="dot">·</span><span class="sub" id="date"></span></span></div><button id="snd" class="tab" style="padding:2px 8px;margin:0" title="Sound on/off">🔊</button></header>
 <nav class="tabbar" id="tabbar"><button class="tab on" id="tabT"><i>🃏</i><span class="tl">Home</span><span class="tsh">Home</span></button><button class="tab" id="tabC"><i>🗂️</i><span class="tl">Collection</span><span class="tsh">Cards</span></button><button class="tab" id="tabA"><i>🏆</i><span class="tl">Achievements</span><span class="tsh">Awards</span></button><button class="tab" id="tabL" hidden><i>📊</i><span class="tl">Leaderboard</span><span class="tsh">Board</span></button><button class="tab" id="tabS"><i>🧪</i><span class="tl">Sandbox</span><span class="tsh">Lab</span></button><button class="tab" id="tabU"><i>👤</i><span class="tl">User</span><span class="tsh">You</span></button></nav>
@@ -963,25 +982,25 @@ const ACH=[
  {n:'By the Numbers',e:'🔢',d:'Rules text contains 6 or more digits (+1/+1 counters, 2/2 tokens and the like)',pts:30,t:c=>(tx(c).match(/\d/g)||[]).length>=6},
 ];
 // ---- Batch 1 (generated): stat values, release years, set and promo types, artists, alphabet, Scrabble, keywords ----
-// Values that almost every card has (power, toughness, mana value, stat line, release year, first letter) are worth 0 points when common:
-// they still count for medals and set progress. Rarer values are worth more.
+// Points are graded by how often an achievement fires: 5 for the ones nearly every card earns one of (mana value, release year, first letter, set type),
+// 10 for common ones that fire on only some cards, and more for rarer ones. Only the release weekdays and months stay at 0 (pure collectibles).
 function buildBatch1(){
  const A=[],S=[];
  const add=(set,e,list)=>{S.push({n:set,e,items:list.map(x=>x.n)});A.push(...list)};
  const num=(c,k)=>{const v=ptv(c,k);return Number.isFinite(v)?v:NaN};
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  // power, toughness, mana value
- const PP=[10,0,0,0,0,10,10,20,20,30,30,30,30,30],TP=[20,0,0,0,0,10,10,20,20,30,30,30,30,30],MP=[0,0,0,0,0,0,10,20,20,30,30,40,40,40,40,40,40];
+ const PP=[10,10,10,10,10,10,10,20,20,30,30,30,30,30],TP=[20,10,10,10,10,10,10,20,20,30,30,30,30,30],MP=[5,5,5,5,5,5,10,20,20,30,30,40,40,40,40,40,40];
  add('Power Plant','💪',PP.map((p,n)=>({n:'Power '+(n===13?'13+':n),e:'💪',d:'A creature with power '+(n===13?'13 or more':n),pts:p,t:c=>{const v=num(c,'power');return n===13?v>=13:v===n}})));
  add('Toughness Test','🛡️',TP.map((p,n)=>({n:'Toughness '+(n===13?'13+':n),e:'🛡️',d:'A creature with toughness '+(n===13?'13 or more':n),pts:p,t:c=>{const v=num(c,'toughness');return n===13?v>=13:v===n}})));
  add('Mana Values','🔮',MP.map((p,n)=>({n:'Mana Value '+(n===16?'16+':n),e:'🔮',d:'A card with mana value '+(n===16?'16 or more':n),pts:p,t:c=>n===16?c.cmc>=16:c.cmc===n})));
- const lines=[];for(let p=1;p<=7;p++)for(let q=1;q<=7;q++)lines.push({n:'Stat Line '+p+'/'+q,e:'⚔️',d:'A creature that is exactly '+p+'/'+q,pts:(p<=5&&q<=5)?0:10,t:c=>num(c,'power')===p&&num(c,'toughness')===q});
+ const lines=[];for(let p=1;p<=7;p++)for(let q=1;q<=7;q++)lines.push({n:'Stat Line '+p+'/'+q,e:'⚔️',d:'A creature that is exactly '+p+'/'+q,pts:(p<=5&&q<=5)?10:20,t:c=>num(c,'power')===p&&num(c,'toughness')===q});
  add('Stat Lines','⚔️',lines);
  // release years of the printing
- const yrs=[];for(let y=1993;y<=2026;y++)yrs.push({n:'Class of '+y,e:'📅',d:'This printing was released in '+y,pts:y===1993?30:y<=1996?20:y<=2009?10:0,t:c=>(c.released_at||'').slice(0,4)===String(y)});
+ const yrs=[];for(let y=1993;y<=2026;y++)yrs.push({n:'Class of '+y,e:'📅',d:'This printing was released in '+y,pts:y===1993?30:y<=1996?20:y<=2009?10:5,t:c=>(c.released_at||'').slice(0,4)===String(y)});
  add('Release Years','📅',yrs);
  // set types
- const ST=[['core','Core Set','📘',10,'A Core Set printing'],['expansion','Expansion','📕',0,'An expansion set printing'],['masters','Masters Set','🎓',10,'A Masters-style reprint set'],['commander','Commander Deck','🏰',10,'Printed in a Commander product'],['draft_innovation','Draft Innovation','🧪',20,'Printed in a draft experiment like Jumpstart or Conspiracy'],['duel_deck','Duel Deck','🤺',20,'Printed in a Duel Deck'],['from_the_vault','From the Vault','🔒',30,'Printed in a From the Vault box'],['premium_deck','Premium Deck','💎',30,'Printed in a Premium Deck Series'],['spellbook','Spellbook','📖',30,'Printed in a Spellbook'],['starter','Starter Deck','🎒',20,'Printed in a starter product'],['box','Box Set','📦',30,'Printed in a special box set'],['funny','Un-Set','🤡',20,'Printed in an Un-set or other joke set'],['masterpiece','Masterpiece','🖼️',40,'A Masterpiece Series printing'],['memorabilia','Memorabilia','🏆',30,'Printed in a memorabilia set'],['treasure_chest','Treasure Chest','🪙',30,'Printed in a Treasure Chest'],['planechase','Planechase','🌌',20,'Printed in a Planechase set'],['archenemy','Archenemy','😈',30,'Printed in an Archenemy set'],['arsenal','Arsenal','🛠️',30,'Printed in an Arsenal set'],['alchemy','Alchemy','⚗️',20,'An Alchemy digital printing'],['vanguard','Vanguard Series','🎴',30,'A Vanguard card']];
+ const ST=[['core','Core Set','📘',10,'A Core Set printing'],['expansion','Expansion','📕',5,'An expansion set printing'],['masters','Masters Set','🎓',10,'A Masters-style reprint set'],['commander','Commander Deck','🏰',10,'Printed in a Commander product'],['draft_innovation','Draft Innovation','🧪',20,'Printed in a draft experiment like Jumpstart or Conspiracy'],['duel_deck','Duel Deck','🤺',20,'Printed in a Duel Deck'],['from_the_vault','From the Vault','🔒',30,'Printed in a From the Vault box'],['premium_deck','Premium Deck','💎',30,'Printed in a Premium Deck Series'],['spellbook','Spellbook','📖',30,'Printed in a Spellbook'],['starter','Starter Deck','🎒',20,'Printed in a starter product'],['box','Box Set','📦',30,'Printed in a special box set'],['funny','Un-Set','🤡',20,'Printed in an Un-set or other joke set'],['masterpiece','Masterpiece','🖼️',40,'A Masterpiece Series printing'],['memorabilia','Memorabilia','🏆',30,'Printed in a memorabilia set'],['treasure_chest','Treasure Chest','🪙',30,'Printed in a Treasure Chest'],['planechase','Planechase','🌌',20,'Printed in a Planechase set'],['archenemy','Archenemy','😈',30,'Printed in an Archenemy set'],['arsenal','Arsenal','🛠️',30,'Printed in an Arsenal set'],['alchemy','Alchemy','⚗️',20,'An Alchemy digital printing'],['vanguard','Vanguard Series','🎴',30,'A Vanguard card']];
  add('Set Types','📚',ST.map(([k,n,e,p,d])=>({n,e,d,pts:p,t:c=>c.set_type===k})));
  // promo types and special flags
  const PR=[['prerelease','Prerelease Promo','🎉',20],['buyabox','Buy-a-Box','🎁',20],['bundle','Bundle Promo','🧺',20],['fnm','Friday Night Magic','🌙',20],['judgegift','Judge Gift','⚖️',40],['gameday','Game Day','🎮',30],['draftweekend','Draft Weekend','🏁',30],['release','Release Event','🎊',30],['setpromo','Set Promo','🔖',20],['datestamped','Date Stamped','📆',30],['tourney','Tournament Prize','🏅',40],['convention','Convention Exclusive','🎪',30],['arenaleague','Arena League','🏟️',30],['openhouse','Open House','🏠',30],['serialized','Serialized','🔢',60],['surgefoil','Surge Foil','⚡',30],['galaxyfoil','Galaxy Foil','🌠',30],['confettifoil','Confetti Foil','🎆',30],['ripplefoil','Ripple Foil','🌊',30],['textured','Textured Foil','🧱',30],['promopack','Promo Pack','🎫',20],['boosterfun','Booster Fun','✨',10],['glossy','Glossy','💧',20],['intropack','Intro Pack','📗',20],['planeswalkerdeck','Planeswalker Deck','🌀',20]];
@@ -995,7 +1014,7 @@ function buildBatch1(){
  add('Artist Alley','🎨',AR.map(([n,p])=>({n,e:'🎨',d:'Illustrated by '+n,pts:p,t:c=>artistsOf(c).includes(norm(n))})));
  // alphabet and Scrabble
  const first=c=>{const m=cName(c).match(/[A-Za-z]/);return m?m[0].toUpperCase():''};
- const LP={A:0,B:0,C:0,D:0,E:10,F:0,G:0,H:0,I:10,J:20,K:10,L:0,M:0,N:10,O:10,P:0,Q:20,R:0,S:0,T:0,U:20,V:10,W:0,X:20,Y:10,Z:20};
+ const LP={A:5,B:5,C:5,D:5,E:10,F:5,G:5,H:5,I:10,J:20,K:10,L:5,M:5,N:10,O:10,P:5,Q:20,R:5,S:5,T:5,U:20,V:10,W:5,X:20,Y:10,Z:20};
  const al=Object.keys(LP).map(L=>({n:'Letter '+L,e:'🔤',d:'The card name starts with '+L,pts:LP[L],t:c=>first(c)===L}));
  const SV={A:1,B:3,C:3,D:2,E:1,F:4,G:2,H:4,I:1,J:8,K:5,L:1,M:3,N:1,O:1,P:3,Q:10,R:1,S:1,T:1,U:1,V:4,W:4,X:8,Y:4,Z:10};
  const scr=c=>cName(c).toUpperCase().split('').reduce((t,ch)=>t+(SV[ch]||0),0);
@@ -1013,6 +1032,158 @@ function buildBatch1(){
  return{ach:A,sets:S};
 }
 const BATCH1=buildBatch1();ACH.push(...BATCH1.ach);
+
+// ---- Batch 2 (generated): creature types, rarity and color combos, rules text, wordplay, numbers and dates, printing flags ----
+// Points are graded by how often an achievement fires (5 for very common, 10 for common, more for rarer ones).
+function buildBatch2(){
+ const A=[],S=[];
+ const add=(set,e,list)=>{S.push({n:set,e,items:list.map(x=>x.n)});A.push(...list)};
+ const colsOf=c=>c.colors||(c.card_faces&&c.card_faces[0]&&c.card_faces[0].colors)||[];
+ const num=(c,k)=>{const v=ptv(c,k);return Number.isFinite(v)?v:NaN};
+ const lines=c=>tx(c).split('\n').filter(l=>l.trim());
+ // ---- creature types, in families ----
+ const fam=(set,e,defE,rows)=>add(set,e,rows.map(([t,label,p,em])=>({n:label,e:em||defE,d:'A '+t+' creature',pts:p,t:c=>subHas(c,t.toLowerCase())})));
+ fam('Humanoid Types','🧑','🧑',[['Human','Humans',10],['Soldier','Soldiers',10],['Rogue','Rogues',10],['Shaman','Shamans',10],['Druid','Druids',10],['Monk','Monks',10],['Assassin','Assassins',10],['Scout','Scouts',10],['Advisor','Advisors',10],['Artificer','Artificers',10],['Berserker','Berserkers',20],['Noble','Nobles',20],['Peasant','Peasants',20],['Citizen','Citizens',10],['Dwarf','Dwarves',10],['Orc','Orcs',10],['Ogre','Ogres',10],['Troll','Trolls',10],['Giant','Giants',10],['Kithkin','Kithkin',20],['Kor','Kor',20],['Merfolk','Merfolk',10],['Mercenary','Mercenaries',10],['Rebel','Rebels',10],['Archer','Archers',10],['Barbarian','Barbarians',10],['Warlock','Warlocks',10]]);
+ fam('Beasts & Bugs','🐾','🐾',[['Beast','Beasts',10],['Cat','Cats',10,'🐱'],['Dog','Dogs',10,'🐶'],['Wolf','Wolves',10,'🐺'],['Bear','Bears',10,'🐻'],['Rhino','Rhinos',20,'🦏'],['Elephant','Elephants',20,'🐘'],['Bird','Birds',10,'🐦'],['Snake','Snakes',10,'🐍'],['Lizard','Lizards',10,'🦎'],['Crocodile','Crocodiles',20,'🐊'],['Turtle','Turtles',20,'🐢'],['Frog','Frogs',20,'🐸'],['Rat','Rats',10,'🐀'],['Spider','Spiders',10,'🕷️'],['Insect','Insects',10,'🐛'],['Fish','Fish',10,'🐟'],['Crab','Crabs',20,'🦀'],['Octopus','Octopuses',20,'🐙'],['Squirrel','Squirrels',20,'🐿️'],['Bat','Bats',10,'🦇'],['Boar','Boars',20,'🐗'],['Horse','Horses',10,'🐴'],['Ape','Apes',20,'🦍'],['Rabbit','Rabbits',20,'🐰'],['Mouse','Mice',20,'🐭'],['Fox','Foxes',20,'🦊'],['Hound','Hounds',10,'🐕']]);
+ fam('Dark Creatures','💀','💀',[['Skeleton','Skeletons',10],['Spirit','Spirits',10,'👻'],['Horror','Horrors',10],['Specter','Specters',10],['Wraith','Wraiths',10],['Shade','Shades',10],['Nightmare','Nightmares',10],['Imp','Imps',10],['Spawn','Spawn',10],['Werewolf','Werewolves',10,'🐺'],['Ghoul','Ghouls',20],['Devil','Devils',10,'😈'],['Rakshasa','Rakshasas',20]]);
+ fam('Myth & Monsters','🦄','🦄',[['Sphinx','Sphinxes',10],['Minotaur','Minotaurs',10],['Satyr','Satyrs',10],['Centaur','Centaurs',10],['Cyclops','Cyclopes',20],['Gorgon','Gorgons',20],['Harpy','Harpies',20],['Leviathan','Leviathans',20],['Wurm','Wurms',10],['Hydra','Hydras',10],['Drake','Drakes',10],['Griffin','Griffins',10],['Pegasus','Pegasi',20],['Unicorn','Unicorns',20],['Faerie','Faeries',10,'🧚'],['Treefolk','Treefolk',10,'🌳'],['Illusion','Illusions',10],['Avatar','Avatars',20],['Kraken','Krakens',20,'🦑'],['Serpent','Serpents',10],['Dryad','Dryads',20],['Nymph','Nymphs',20],['Phoenix','Phoenixes',20,'🔥'],['Chimera','Chimeras',20],['Manticore','Manticores',20],['Basilisk','Basilisks',20]]);
+ fam('Constructs & Planar','⚙️','⚙️',[['Elemental','Elementals',10,'🌪️'],['Golem','Golems',10],['Construct','Constructs',10],['Myr','Myr',20],['Thopter','Thopters',10],['Servo','Servos',20],['Plant','Plants',10,'🌱'],['Fungus','Fungus Folk',10,'🍄'],['Saproling','Saprolings',10],['Aetherborn','Aetherborn',20],['Vedalken','Vedalken',20],['Viashino','Viashino',20],['Kavu','Kavu',30],['Moonfolk','Moonfolk',20],['Nephilim','Nephilim',30],['Cephalid','Cephalids',30],['Jellyfish','Jellyfish',20,'🪼'],['Homunculus','Homunculi',20]]);
+ // ---- rarity surprises ----
+ const rar=(r,t)=>c=>c.rarity===r&&has(c,t);
+ add('Rarity Surprises','🎲',[
+  {n:'Mythic Land',e:'🏔️',d:'A Land printed at mythic rarity',pts:40,t:rar('mythic','Land')},
+  {n:'Mythic Instant',e:'⚡',d:'An Instant printed at mythic rarity',pts:30,t:rar('mythic','Instant')},
+  {n:'Mythic Sorcery',e:'🔮',d:'A Sorcery printed at mythic rarity',pts:30,t:rar('mythic','Sorcery')},
+  {n:'Mythic Enchantment',e:'✨',d:'An Enchantment printed at mythic rarity',pts:20,t:rar('mythic','Enchantment')},
+  {n:'Mythic Creature',e:'🐲',d:'A Creature printed at mythic rarity',pts:10,t:rar('mythic','Creature')},
+  {n:'Common Legend',e:'👑',d:'A Legendary card printed at common rarity',pts:40,t:c=>c.rarity==='common'&&has(c,'Legendary')},
+  {n:'Uncommon Legend',e:'🎖️',d:'A Legendary card printed at uncommon rarity',pts:10,t:c=>c.rarity==='uncommon'&&has(c,'Legendary')},
+  {n:'Uncommon Planeswalker',e:'🌀',d:'A Planeswalker printed at uncommon rarity',pts:40,t:rar('uncommon','Planeswalker')},
+  {n:'Rare Basic',e:'🌲',d:'A Basic Land printed at rare rarity or higher',pts:60,t:c=>has(c,'Basic')&&(c.rarity==='rare'||c.rarity==='mythic')}
+ ]);
+ // ---- color by type ----
+ const CL=[['W','White','⚪'],['U','Blue','🔵'],['B','Black','⚫'],['R','Red','🔴'],['G','Green','🟢']],TY=[['Creature',10],['Instant',10],['Sorcery',10],['Enchantment',20],['Artifact',30]];
+ const grid=[];CL.forEach(([k,cn,em])=>TY.forEach(([t,p])=>grid.push({n:cn+' '+t,e:em,d:'A mono-'+cn.toLowerCase()+' '+t,pts:p,t:c=>{const x=colsOf(c);return x.length===1&&x[0]===k&&has(c,t)}})));
+ add('Color by Type','🎨',grid);
+ // ---- rules text (merged into Card Text and Rare Text) ----
+ add('Card Text','📖',[
+  {n:'Modal Spell',e:'🔀',d:'Rules text says "choose one" (or two, three or both)',pts:10,t:c=>/\bchoose (one|two|three|any number)\b|\bchoose one or both\b/.test(tx(c))},
+  {n:'Activated Ability',e:'🖱️',d:'Has an ability you pay a cost to use (a colon in the rules text)',pts:10,t:c=>/(^|\n)[^\n:•—]{1,100}:\s/.test(tx(c))},
+  {n:'Triggered Ability',e:'🔔',d:'Rules text has a "whenever" trigger',pts:10,t:c=>/\bwhenever\b/.test(tx(c))},
+  {n:'Upkeep Trigger',e:'⏰',d:'Rules text says "at the beginning of"',pts:10,t:c=>/at the beginning of/.test(tx(c))},
+  {n:'Opponents Beware',e:'🎯',d:'Rules text affects "each opponent"',pts:10,t:c=>/each opponent/.test(tx(c))},
+  {n:'Sacrificial Lamb',e:'🐑',d:'Rules text involves a sacrifice',pts:10,t:c=>/\bsacrifice\b/.test(tx(c))},
+  {n:'Exiled',e:'🚪',d:'Rules text exiles something',pts:10,t:c=>/\bexile\b/.test(tx(c))},
+  {n:'Copy That',e:'📠',d:'Rules text makes a copy',pts:20,t:c=>/\bcop(y|ies)\b/.test(tx(c))},
+  {n:'Counter Culture',e:'🔢',d:'Rules text uses +1/+1 counters',pts:10,t:c=>/\+1\/\+1 counter/.test(tx(c))}
+ ]);
+ add('Rare Text','📜',[
+  {n:'One-Liner',e:'➖',d:'Exactly one line of rules text',pts:5,t:c=>lines(c).length===1},
+  {n:'Six Pack',e:'📚',d:'Six or more lines of rules text',pts:20,t:c=>lines(c).length>=6},
+  {n:'Keyword Only',e:'🏷️',d:'Rules text is nothing but keywords',pts:10,t:c=>{let t=tx(c);(c.keywords||[]).forEach(k=>{t=t.split(k.toLowerCase()).join(' ')});t=t.replace(/\{[^}]*\}|\d+|[,.;\n•—:+-]/g,' ').trim();return (c.keywords||[]).length>0&&t===''}},
+  {n:'Bullet Points',e:'•',d:'Rules text has bullet points',pts:10,t:c=>/•/.test(cOracle(c))},
+  {n:'Rainbow Mana',e:'🌈',d:'Can produce three or more colors of mana',pts:30,t:c=>(c.produced_mana||[]).filter(x=>'WUBRG'.includes(x)).length>=3},
+  {n:'Color Indicator',e:'🎨',d:'Has a color indicator dot instead of a mana cost',pts:30,t:c=>(c.color_indicator||(c.card_faces||[]).flatMap(f=>f.color_indicator||[])||[]).length>0}
+ ]);
+ // ---- wordplay and names that match the card (merged into Name Games) ----
+ const nm=c=>cName(c),letters=c=>nm(c).toLowerCase().replace(/[^a-z]/g,''),words=c=>nm(c).toLowerCase().split(/[^a-z']+/).filter(Boolean);
+ const dbl=c=>words(c).reduce((t,w)=>t+(w.replace(/[^a-z]/g,'').match(/([a-z])\1/g)||[]).length,0);
+ const NW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+ const WC={white:'W',blue:'U',black:'B',red:'R',green:'G'};
+ add('Name Games','🔡',[
+  {n:'Isogram',e:'🔠',d:'A name of 7 or more letters with no letter used twice',pts:40,t:c=>{const l=letters(c);return l.length>=7&&new Set(l).size===l.length}},
+  {n:'Double Double',e:'✌️',d:'A name with two or more doubled letters (like ll or ee)',pts:10,g:'doubles',t:c=>dbl(c)>=2},
+  {n:'Triple Double',e:'🤟',d:'A name with three or more doubled letters',pts:40,g:'doubles',t:c=>dbl(c)>=3},
+  {n:'Consonant Cluster',e:'🧱',d:'Five or more consonants in a row inside one word',pts:40,t:c=>words(c).some(w=>/[^aeiouy'\-]{5,}/.test(w.replace(/[^a-z]/g,'')))},
+  {n:'Contains Q',e:'❓',d:'The name has a Q somewhere',pts:20,t:c=>letters(c).includes('q')},
+  {n:'Contains Z',e:'⚡',d:'The name has a Z somewhere',pts:20,t:c=>letters(c).includes('z')},
+  {n:'Contains X',e:'✖️',d:'The name has an X somewhere',pts:20,t:c=>letters(c).includes('x')},
+  {n:'Contains J',e:'🃏',d:'The name has a J somewhere',pts:20,t:c=>letters(c).includes('j')},
+  {n:'Tiny Name',e:'🐜',d:'A name of four letters or fewer',pts:30,t:c=>{const l=letters(c);return l.length>0&&l.length<=4}},
+  {n:'Run-On Name',e:'📜',d:'A name of five or more words',pts:30,t:c=>words(c).length>=5},
+  {n:'Typecast',e:'🎭',d:'The name contains one of the card\'s own creature types',pts:10,t:c=>{if(has(c,'Basic'))return false;const st=((c.type_line||'').split('//')[0].split('—')[1]||'').toLowerCase().split(/\s+/).filter(w=>w.length>=3);const n=nm(c).toLowerCase();return st.some(w=>new RegExp('\\b'+w+'s?\\b').test(n))}},
+  {n:'Name Your Number',e:'🔟',d:'The name has a number word that matches the card\'s mana value or power',pts:30,t:c=>words(c).some(w=>NW[w]!==undefined&&(NW[w]===c.cmc||NW[w]===num(c,'power')))},
+  {n:'Color Blind',e:'🙈',d:'The name has a color word the card does not have',pts:30,t:c=>{const hit=words(c).filter(w=>WC[w]);const x=colsOf(c);return hit.length>0&&hit.every(w=>!x.includes(WC[w]))}}
+ ]);
+ // ---- more word themes (merged into Word Themes) ----
+ const wt=(n,e,d,p,re)=>({n,e,d,pts:p,t:c=>hayHas(c,R(re))});
+ add('Word Themes','🗺️',[
+  wt('Elemental Forces','🌪️','Fire, water, earth or wind words appear on the card',10,'fire|flame|flames|blaze|inferno|water|wave|waves|tide|ocean|river|earth|stone|boulder|wind|winds|breeze'),
+  wt('Gem Collector','💎','A gem like ruby, sapphire, diamond or jade appears on the card',20,'ruby|sapphire|emerald|diamond|opal|jade|pearl|amber|onyx|topaz|crystal|gem|gems|jewel'),
+  wt('Four Seasons','🍂','A season like spring, summer, autumn or winter appears on the card',20,'spring|summer|autumn|winter'),
+  wt('Calendar Page','🗓️','A day or month name appears on the card',30,'monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|april|june|july|august|september|october|november|december'),
+  wt('Relatives','👪','A family word like mother, father, brother or child appears on the card',20,'mother|father|brother|sister|daughter|son|sons|sibling|siblings|parent|parents|child|children|family|grandmother|grandfather'),
+  wt('Honest Work','🔨','A trade like smith, merchant, farmer or sailor appears on the card',10,'smith|merchant|farmer|baker|miller|guard|sailor|scribe|healer|hunter|fisher|thief|priest|scholar|mason|carpenter'),
+  wt('Armory','🗡️','A weapon like sword, axe, spear or bow appears on the card',10,'sword|swords|axe|axes|spear|spears|bow|dagger|blade|blades|lance|mace|hammer|arrow|arrows|club|whip'),
+  wt('Fortress','🏰','A stronghold word like castle, tower, wall or gate appears on the card',20,'castle|tower|towers|wall|walls|gate|gates|fortress|keep|citadel|bastion|rampart|moat|bridge'),
+  wt('Divine Intervention','😇','A holy word like divine, sacred, heaven or blessing appears on the card',10,'divine|holy|heaven|sacred|saint|prayer|blessing|blessed|god|goddess|gods|miracle'),
+  wt('Underworld','🔥','A grim word like grave, tomb, hell or crypt appears on the card',10,'grave|graves|hell|damned|tomb|crypt|underworld|abyss|doom|cursed|curse|death'),
+  wt('Journey','🧭','A travel word like road, path, journey or quest appears on the card',20,'road|roads|path|paths|journey|voyage|travel|traveler|wander|wanderer|quest|trail|expedition|pilgrim'),
+  wt('Light and Shadow','🌗','Light or shadow words appear on the card',10,'light|shadow|shadows|darkness|gloom|shine|radiant|glow|twilight|shade'),
+  wt('Dream Sequence','💭','A dreamy word like dream, nightmare, sleep or vision appears on the card',20,'dream|dreams|nightmare|sleep|slumber|vision|visions|fantasy|trance|illusion')
+ ]);
+ // ---- numbers and dates ----
+ const cn=c=>String(c.collector_number||''),cnum=c=>/^\d+$/.test(cn(c))?+cn(c):NaN;
+ add('Collector Numbers','#️⃣',[
+  {n:'Number One',e:'1️⃣',d:'Collector number 1',pts:30,t:c=>cn(c)==='1'},
+  {n:'The Answer',e:'🌌',d:'Collector number 42',pts:30,t:c=>cn(c)==='42'},
+  {n:'Nice',e:'😏',d:'Collector number 69',pts:30,t:c=>cn(c)==='69'},
+  {n:'Century',e:'💯',d:'Collector number 100',pts:20,t:c=>cn(c)==='100'},
+  {n:'Number of the Beast',e:'😈',d:'Collector number 666',pts:40,t:c=>cn(c)==='666'},
+  {n:'Jackpot',e:'🎰',d:'Collector number 777',pts:40,t:c=>cn(c)==='777'},
+  {n:'Deep Cut',e:'⛏️',d:'Collector number from 500 to 999',pts:20,t:c=>cnum(c)>=500&&cnum(c)<1000},
+  {n:'Four Digits',e:'🔢',d:'Collector number of 1000 or more',pts:40,t:c=>cnum(c)>=1000},
+  {n:'Palindrome Number',e:'🔁',d:'A collector number that reads the same backwards (3+ digits)',pts:40,t:c=>{const d=cn(c);return /^\d{3,}$/.test(d)&&d===d.split('').reverse().join('')&&new Set(d).size>1}},
+  {n:'Repeating Digits',e:'🔂',d:'A collector number made of one repeated digit (11, 222...)',pts:40,t:c=>/^(\d)\1+$/.test(cn(c))},
+  {n:'Number Match',e:'🧩',d:'The collector number equals the mana value',pts:20,t:c=>cnum(c)>=1&&cnum(c)===c.cmc},
+  {n:'Star Number',e:'⭐',d:'A collector number with a star (★)',pts:40,t:c=>/[★☆]/.test(cn(c))},
+  {n:'Lettered Number',e:'🔤',d:'A collector number with a letter (like 12a)',pts:10,t:c=>/[a-z]/i.test(cn(c))}
+ ]);
+ add('Power & Toughness','💪',[
+  {n:'Overstatted',e:'💪',d:'A creature whose power is higher than its mana value',pts:10,t:c=>c.cmc>=1&&num(c,'power')>c.cmc},
+  {n:'Fair Trade',e:'⚖️',d:'A creature whose power equals its mana value',pts:10,t:c=>c.cmc>=1&&num(c,'power')===c.cmc},
+  {n:'Double Power',e:'✌️',d:'Power exactly double the toughness',pts:20,t:c=>num(c,'toughness')>=1&&num(c,'power')===2*num(c,'toughness')},
+  {n:'Lucky Thirteen',e:'🍀',d:'Power plus toughness adds up to 13',pts:30,t:c=>num(c,'power')+num(c,'toughness')===13},
+  {n:'Prime Cost',e:'🧮',d:'Mana value is a prime number (2, 3, 5, 7, 11 or 13)',pts:5,t:c=>[2,3,5,7,11,13].includes(c.cmc)},
+  {n:'Square Cost',e:'🔲',d:'Mana value is a perfect square (1, 4, 9 or 16)',pts:5,t:c=>[1,4,9,16].includes(c.cmc)}
+ ]);
+ const dow=d=>{const t=Date.parse((d||'')+'T00:00:00Z');return isNaN(t)?-1:new Date(t).getUTCDay()};
+ const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+ const rel=[];
+ DAYS.forEach((d,i)=>rel.push({n:d+' Release',e:'📆',d:'This printing was released on a '+d,pts:i===0?10:0,t:c=>dow(c.released_at)===i}));
+ MONTHS.forEach((m,i)=>rel.push({n:m+' Release',e:'🗓️',d:'This printing was released in '+m,pts:0,t:c=>(c.released_at||'').slice(5,7)===String(i+1).padStart(2,'0')}));
+ rel.push({n:'Weekday Twin',e:'👯',d:'Released on the same weekday as today',pts:10,t:c=>dow(c.released_at)>=0&&dow(c.released_at)===dow(today)});
+ add('Release Days','🗓️',rel);
+ const LY=[2,3,4,5,6,7].map(n=>({n:'Loyalty '+n,e:'🌀',d:'A Planeswalker that starts at '+n+' loyalty',pts:{2:20,3:10,4:10,5:10,6:20,7:30}[n],t:c=>num(c,'loyalty')===n}));
+ LY.push({n:'Loyalty 8+',e:'🌀',d:'A Planeswalker that starts at 8 or more loyalty',pts:40,t:c=>num(c,'loyalty')>=8});
+ [3,4,5,6].forEach(n=>LY.push({n:'Defense '+n,e:'🛡️',d:'A Battle with defense '+n,pts:30,t:c=>num(c,'defense')===n}));
+ add('Planeswalkers & Battles','🌀',LY);
+ // ---- printing flags ----
+ const wm=[['orzhov','Orzhov Syndicate','💰',20],['azorius','Azorius Senate','⚖️',20],['boros','Boros Legion','🔥',20],['dimir','House Dimir','🕵️',20],['golgari','Golgari Swarm','🍄',20],['gruul','Gruul Clans','🪓',20],['izzet','Izzet League','⚗️',20],['rakdos','Cult of Rakdos','🎪',20],['selesnya','Selesnya Conclave','🌳',20],['simic','Simic Combine','🧬',20],['abzan','Abzan Houses','🛡️',30],['jeskai','Jeskai Way','☯️',30],['sultai','Sultai Brood','🐍',30],['mardu','Mardu Horde','🏇',30],['temur','Temur Frontier','🐻',30],['phyrexian','Phyrexian Seal','🦾',30],['mirran','Mirran Seal','🔩',30]];
+ const ss=[['oval','Oval Stamp','⭕',10],['acorn','Acorn Stamp','🌰',30],['triangle','Triangle Stamp','🔺',20],['circle','Circle Stamp','🔵',20],['arena','Arena Stamp','🏟️',30],['heart','Heart Stamp','❤️',40],['play','Play Stamp','▶️',30]];
+ const wmk=c=>(c.watermark||(c.card_faces||[]).map(f=>f.watermark).filter(Boolean)[0]||'').toLowerCase();
+ add('Marks & Stamps','🏷️',[...wm.map(([k,n,e,p])=>({n,e,d:'Has the '+k+' watermark',pts:p,t:c=>wmk(c)===k})),...ss.map(([k,n,e,p])=>({n,e,d:'Has a '+k+' security stamp',pts:p,t:c=>c.security_stamp===k}))]);
+ const LA=[['split','Split Decision','✂️',20],['flip','Flip Side','🙃',30],['transform','Transformer','🔄',10],['modal_dfc','Two-Faced Spell','🪞',20],['meld','Meld Pair','🧩',40],['leveler','Level Up','📶',30],['adventure','Adventurer','🗺️',20],['mutate','Mutant','🧬',30],['prototype','Prototype','🧪',30],['reversible_card','Reversible','🔁',40]];
+ add('Card Layouts','🗂️',LA.map(([k,n,e,p])=>({n,e,d:'A card with the '+k.replace(/_/g,' ')+' layout',pts:p,t:c=>c.layout===k})));
+ const LF=['standard','pioneer','modern','legacy','vintage','commander','pauper'],lg=(c,f)=>(c.legalities||{})[f],ok=v=>v==='legal'||v==='restricted';
+ add('Format Legality','⚖️',[
+  {n:'Legal Everywhere',e:'🌍',d:'Legal in Standard, Pioneer, Modern, Legacy, Vintage, Commander and Pauper',pts:40,t:c=>!!c.legalities&&LF.every(f=>ok(lg(c,f)))},
+  {n:'Legal Nowhere',e:'🚫',d:'Not legal in any of those formats',pts:30,t:c=>!!c.legalities&&LF.every(f=>!ok(lg(c,f)))},
+  {n:'Standard Legal',e:'🆕',d:'Legal in Standard right now',pts:10,t:c=>lg(c,'standard')==='legal'},
+  {n:'Pauper Legal',e:'🪙',d:'Legal in Pauper',pts:5,t:c=>lg(c,'pauper')==='legal'},
+  {n:'Vintage Restricted',e:'🔒',d:'Restricted to one copy in Vintage',pts:60,t:c=>lg(c,'vintage')==='restricted'},
+  {n:'Commander Banned',e:'⛔',d:'Banned in Commander',pts:40,t:c=>lg(c,'commander')==='banned'},
+  {n:'Banned Somewhere',e:'🔨',d:'Banned in at least one major format',pts:30,t:c=>!!c.legalities&&LF.some(f=>lg(c,f)==='banned')}
+ ]);
+ const pr=(c,k)=>{const v=parseFloat((c.prices||{})[k]);return Number.isFinite(v)?v:NaN};
+ add('Value & Demand','💰',[
+  {n:'Foil Premium',e:'✨',d:'The foil costs at least three times the regular card',pts:30,t:c=>pr(c,'usd')>0&&pr(c,'usd_foil')>=3*pr(c,'usd')},
+  {n:'Foil Bargain',e:'🏷️',d:'The foil costs less than the regular card',pts:40,t:c=>pr(c,'usd')>0&&pr(c,'usd_foil')>0&&pr(c,'usd_foil')<pr(c,'usd')},
+  {n:'Priceless',e:'❔',d:'No price listed anywhere',pts:30,t:c=>!!c.prices&&['usd','usd_foil','usd_etched','eur','tix'].every(k=>!Number.isFinite(pr(c,k)))}
+ ]);
+ return{ach:A,sets:S};
+}
+const BATCH2=buildBatch2();ACH.push(...BATCH2.ach);
 // ---- Daily pick: same card for everyone, based on UTC date ----
 const today=new Date().toISOString().slice(0,10);
 function hash(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
@@ -1213,6 +1384,7 @@ const SETS=[
  {n:'Legendary Specials',e:'👑',items:['Colorless Legend','Mythic Gold Legend','One-Drop Legend','Giant Legend','Legendary Land','Legendary Machine','Gold Walker','Legendary Spell']},
 ];
 BATCH1.sets.forEach(x=>SETS.push(x));
+BATCH2.sets.forEach(x=>{const e=SETS.find(t=>t.n===x.n);if(e)e.items.push(...x.items);else SETS.push(x)}); // sets with an existing name grow instead of duplicating
 const FOIL_MAX=60; // best foil result (Etched Foil)
 // Achievements with the same g:'id' form a ladder: a card only earns the highest one it qualifies for.
 // EXCL lists groups of exclusive paths: a card can only follow ONE option in each group ('g:id' means that ladder's top rung).
@@ -1344,6 +1516,7 @@ async function renderUser(){
  const tile=(l,v,s)=>`<div class="ut"><div class="uv">${v}</div><div class="ul">${l}</div>${s?`<div class="us">${s}</div>`:''}</div>`;
  el.innerHTML=`<div class="setc" style="text-align:center"><div class="sub" id="uname">Player</div><div class="sub" style="font-size:.8rem;letter-spacing:.12em;margin-top:6px">TOTAL SCORE</div><div class="score" id="utot">${total.toLocaleString()}</div>${n?'':'<p class="sub">Draw your first card to start your score.</p>'}<div class="sub" id="urank"></div></div><div class="ugrid">${tile('Days played',n)}${tile('Best day',bestDay.toLocaleString(),n?stTag(bestDay):'')}${tile('Average day',(n?Math.round(total/n):0).toLocaleString())}${tile('Current streak',calcStreak(st.days))}${tile('Longest streak',longestStreak(st.days))}${tile('Cards collected',cards.length)}${tile('Foil cards',foils)}${tile('Achievements',got.size+' / '+allN)}</div>${bestEntry?`<div class="setc" style="margin-top:14px"><div class="sub">Best card</div><h3 style="margin:2px 0">${esc(bestEntry[1].name)}</h3><div class="sub">${bestEntry[0]} · ${bestEntry[1].score.toLocaleString()} pts ${stTag(bestEntry[1].score)}</div></div>`:''}`;
  renderDrawStyle(el);
+ renderInstallBox(el);
  if(SB_ON())renderBadgePicker(el);
  if(SB_ON()){const b=document.createElement('div');b.className='setc';b.style.marginTop='14px';
   b.innerHTML=`<h3>Public leaderboard</h3><div class="sub">Pick a display name to share your daily scores. Everyone can see this name.</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="pname" maxlength="20" placeholder="Display name" value="${esc(sbName())}" style="flex:1;min-width:140px;padding:10px;border-radius:8px;border:1px solid #4a3f66;background:#120f1c;color:#fff;font:inherit"><button class="tab" id="psave">Save name</button></div><div class="sub" id="pmsg" style="margin-top:6px"></div>`;
@@ -1738,6 +1911,42 @@ async function openCharge(host,cardP,o){
  host.removeEventListener('pointerdown',skipH);
  return c;
 }
+// ---------- Add to Home Screen: a gentle prompt after the first draw, and a section on the You tab ----------
+let _installEv=null;
+const isStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_installEv=e;renderInstallBits()});
+window.addEventListener('appinstalled',()=>{_installEv=null;try{localStorage.setItem('mtgdle-installed','1')}catch(x){}renderInstallBits()});
+async function doInstall(){
+ if(!_installEv)return;
+ const ev=_installEv;_installEv=null;
+ try{ev.prompt();await ev.userChoice}catch(e){}
+ renderInstallBits();
+}
+function installBody(){ // the instructions that fit this device
+ if(isIOS())return `<b>Add MtGRNG to your Home Screen</b>Open it like an app, full screen. In Safari:<div class="istep">1. Tap the <span class="k">Share</span> button (the square with an arrow).</div><div class="istep">2. Scroll down and tap <span class="k">Add to Home Screen</span>.</div>`;
+ if(_installEv)return `<b>Install MtGRNG as an app</b>Open it from your home screen, full screen, with its own icon.<br><button class="tab on instbtn" id="instgo">Install app</button>`;
+ return `<b>Add MtGRNG to your Home Screen</b>Open your browser menu (⋮ or ☰) and choose <span class="k">Install app</span> or <span class="k">Add to Home Screen</span>.`;
+}
+function renderInstallBits(){
+ if(isStandalone()){const a=document.getElementById('installbar');if(a)a.innerHTML='';const u=document.getElementById('installbox');if(u)u.innerHTML='<h3>Install the app</h3><div class="sub">✅ You are using the installed app.</div>';return}
+ let drawn=false,dismissed=false;try{drawn=Object.keys(loadSt().days).length>0;dismissed=!!localStorage.getItem('mtgdle-install-dismissed')}catch(e){}
+ const bar=document.getElementById('installbar');
+ if(bar){
+  if(drawn&&!dismissed&&(isIOS()||_installEv)){
+   bar.innerHTML=`<div class="setc instbar"><span class="iico">📲</span><div class="itx">${installBody()}</div><button class="ix" id="instx" aria-label="Dismiss">✕</button></div>`;
+   const go=bar.querySelector('#instgo');if(go)go.onclick=doInstall;
+   bar.querySelector('#instx').onclick=()=>{try{localStorage.setItem('mtgdle-install-dismissed','1')}catch(e){}bar.innerHTML=''};
+  }else bar.innerHTML='';
+ }
+ const box=document.getElementById('installbox');
+ if(box){box.innerHTML=`<h3>Install the app</h3><div class="itx" style="font-family:var(--ui);font-size:.88rem;line-height:1.45">${installBody()}</div>`;const go=box.querySelector('#instgo');if(go)go.onclick=doInstall}
+}
+function renderInstallBox(el){
+ const old=document.getElementById('installbox');if(old)old.remove();
+ const box=document.createElement('div');box.id='installbox';box.className='setc';box.style.marginTop='14px';el.appendChild(box);renderInstallBits();
+}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})} // SWREG
 let _dailyPre=null;
 function prefetchDaily(){ // start loading today's card (and its art tags) while the player reads the Home page, so the pack can open straight away
  if(_dailyPre||loadSt().days[today]!==undefined)return;
@@ -2023,7 +2232,7 @@ document.getElementById('tabT').onclick=()=>showTab('T');document.getElementById
 document.getElementById('sbgo').onclick=sbDraw;
 document.getElementById('howto').onclick=e=>{e.preventDefault();openWelcome()};
 const drawnToday=loadSt().days[today]!==undefined;
-document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();maybeWelcome();prefetchDaily();loadAchStats();
+document.getElementById('app').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="sub" style="margin-bottom:16px">${drawnToday?'Your card for today is already drawn.':'Your daily card is waiting.'}</div><button id="gen">${drawnToday?'Show Results':'Draw a card'}</button></div><div id="namebox"></div><div id="installbar"></div><div id="top3"></div>${drawnToday?cdHtml():''}`;renderNameBox();renderTop3();maybeWelcome();prefetchDaily();renderInstallBits();loadAchStats();
 document.getElementById('gen').onclick=async()=>{
  const app=document.getElementById('app'),wait=ms=>new Promise(r=>setTimeout(r,ms));
  const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
